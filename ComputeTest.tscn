@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://lmjxrc5mx4d2"]
+
+[ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
+[ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
+[ext_resource type="Texture2D" uid="uid://clqx3uiriuu6x" path="res://moon-png-44668.png" id="2_frrwb"]
+[ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hhxjg"]
+transparency = 1
+albedo_texture = ExtResource("2_frrwb")
+billboard_mode = 1
+billboard_keep_scale = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_k2cyx"]
+material = SubResource("StandardMaterial3D_hhxjg")
+
+[node name="Node3D" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.77609, 0.630622, 0, -0.630622, 0.77609, 0.995237, 3.21347, 8.82938)
+script = ExtResource("1_hhxjg")
+
+[node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh")]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+script = ExtResource("1_5wkny")
+TestMesh = NodePath("MeshInstance3D")
+meshcount = 4096
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CodeMultimesh"]
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
+visible = false
+mesh = SubResource("QuadMesh_k2cyx")
+
+[node name="FPSLabel" type="Label" parent="."]
+offset_right = 219.0
+offset_bottom = 66.0
+script = ExtResource("3_2aubu")
