@@ -11,6 +11,8 @@ var tempbuffer
 var shader
 var uniform_set
 var velocities = []
+var BigG = 0.000001; #0.00066743
+
 
 
 
@@ -18,8 +20,10 @@ func _ready():
 	# Create a local rendering device.
 	rd = RenderingServer.get_rendering_device() # global rd has access to main drawing thread
 	rdlocal = RenderingServer.create_local_rendering_device()# local rd is in separate thread
+	tempbuffer = maketestbuffer() #starting values
 	thismesh=CreateMultimesh(meshcount)
 	makeComputeShader()
+	tempbuffer.clear() #free memory
 	
 
 
@@ -34,7 +38,7 @@ func _process(delta):
 	# Submit to GPU and wait for sync
 	rdlocal.submit()
 	rdlocal.sync()
-	# return bytes from compute shader and send to meshbuffer
+	# return bytes from compute shader and send to multimesh
 	var output_bytes := rdlocal.buffer_get_data(meshbuffer)
 	var output := output_bytes.to_float32_array()
 	RenderingServer.multimesh_set_buffer(thismesh,output)
@@ -61,11 +65,15 @@ func makeComputeShader():
 	var velocitybytes=PackedFloat32Array(velocities).to_byte_array()
 	var velocitybuffer = rdlocal.storage_buffer_create(velocitybytes.size(), velocitybytes)
 	velocityuniform.add_id(velocitybuffer)
+	
 	var paramuniform := RDUniform.new()
-	paramuniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	paramuniform.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
 	paramuniform.binding =1
 	var byte_array_int = PackedInt32Array([meshcount, 1, 1, 1] ).to_byte_array()
-	var parambuffer = rdlocal.storage_buffer_create(byte_array_int.size(), byte_array_int)
+	var byte_array_float = PackedFloat32Array([BigG, 1.0, 1.0, 1.0]).to_byte_array()
+	var byte_array_params=byte_array_int+byte_array_float
+	print("ints ", byte_array_int.size(), " float ", byte_array_float.size(), " combo ", byte_array_params.size())
+	var parambuffer = rdlocal.uniform_buffer_create(byte_array_params.size(), byte_array_params)
 	paramuniform.add_id(parambuffer)
 	uniform_set = rdlocal.uniform_set_create([meshuniform, paramuniform, velocityuniform], shader, 0) 
 	# the last parameter (the 0) needs to match the "set" in our shader file	
@@ -78,15 +86,17 @@ func maketestbuffer():
 	for i in range (meshcount):
 		var temppos = Transform3D().scaled(Vector3(0.2,0.2,0.2))
 		var circrand=randf_range(-PI,PI)
-		temppos = temppos.translated(Vector3((6+i/500.0)*cos(circrand), randf_range(-1.0,1.0),\
-		 (6+i/500.0)*sin(circrand)))
+		temppos = temppos.translated(Vector3((8+i/5000.0)*cos(circrand), randf_range(-1.0,1.0),\
+		 (8+i/5000.0)*sin(circrand)))
 		var tempbasis = temppos.basis
 		# values laid out to match multimesh array
 		interimarray.append_array([tempbasis.x.x, tempbasis.y.x, tempbasis.z.x, temppos.origin.x, \
 	tempbasis.x.y, tempbasis.y.y, tempbasis.z.y, temppos.origin.y, \
 	tempbasis.x.z, tempbasis.y.z, tempbasis.z.z, temppos.origin.z])
-		velocities.append_array([8*temppos.origin.z+randf_range(-.1,.1),randf_range(-0.1,.1),-8*temppos.origin.x+randf_range(-.1,.1),1.0])
-		velocities.append_array([0.0,0.0,0.0,0.0])
+		#//1:3 velocity, 4-mass 5:7 acceleration, 8 free
+		velocities.append_array([8*temppos.origin.z+randf_range(-.1,.1),randf_range(-0.1,.1)\
+		, -8*temppos.origin.x+randf_range(-.1,.1),randf_range(.1,10.0)]);
+		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
 	var mesharray = PackedFloat32Array(interimarray)
 	#var buffertest := rd.storage_buffer_create(mesharray.size(), mesharray)
 	return mesharray
@@ -99,13 +109,13 @@ func CreateMultimesh(size):
 	size,\
 	RenderingServer.MultimeshTransformFormat.MULTIMESH_TRANSFORM_3D,\
 	false, false) #colours, custom
-	tempbuffer = maketestbuffer()
+	
 	RenderingServer.multimesh_set_mesh(multimeshid, TestMesh.mesh.get_rid())
 	RenderingServer.multimesh_set_buffer(multimeshid,tempbuffer)
 	var aabb = Vector3(512.0, 1000.0, 512.0)
 	var instance = RenderingServer.instance_create()
 	var scenario =  get_world_3d().scenario
-	RenderingServer.instance_set_custom_aabb(instance,AABB(Vector3.ZERO,aabb))
+	RenderingServer.instance_set_custom_aabb(instance,AABB(-aabb,aabb))
 	RenderingServer.instance_set_scenario(instance,scenario)
 	RenderingServer.instance_set_base(instance,multimeshid)
 	return multimeshid

@@ -1,9 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://lmjxrc5mx4d2"]
+[gd_scene load_steps=8 format=3 uid="uid://lmjxrc5mx4d2"]
 
 [ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
 [ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
 [ext_resource type="Texture2D" uid="uid://clqx3uiriuu6x" path="res://moon-png-44668.png" id="2_frrwb"]
 [ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
+
+[sub_resource type="Environment" id="Environment_hhxjg"]
+ambient_light_color = Color(0.972549, 0.984314, 1, 1)
+ambient_light_energy = 11.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hhxjg"]
 transparency = 1
@@ -20,6 +24,7 @@ material = SubResource("StandardMaterial3D_hhxjg")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.77609, 0.630622, 0, -0.630622, 0.77609, 0.995237, 3.21347, 8.82938)
+environment = SubResource("Environment_hhxjg")
 script = ExtResource("1_hhxjg")
 
 [node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh")]
