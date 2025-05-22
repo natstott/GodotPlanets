@@ -6,16 +6,16 @@ planet objects with the data for Godot pipeline to render.
 
 I changed the drawing of the planets to use a multimesh.
 The compute shader now generates the planet positions in the 
-format needed for the multimesh buffer. The idea is that
+format needed for the multimesh buffer. The idea was that
 the multimesh buffer can be linked to the compute shader so
-it can be updated on the GPU - at present I couldnt get this to work
-using multimesh_get_command_buffer_rd_rid as although it returns the
-buffer RID correctly, the compute shader cant see it as it is connected
-to a local renderingdevice, not the global one where multimesh is.
+it can be updated on the GPU - Originally I couldnt get this to work
+using multimesh_get_command_buffer_rd_rid until u/godot_clayjohn explained
+that a compute shader can run on the global renderingdevice but you will not
+be able to control when it is dispatched.
 
 Basic function - implement gravity attraction between particles.
-GMm/r^2
-Scaling- for realistic planets -
+F=GMm/r^2
+Scaling- for realistic planets - to be updated
 1 screen unit =	1.00E+09	m	
 1 mass unit = 1.00E+24	kilograms
 1 second gamtime 1.00E+05	seconds
@@ -28,3 +28,5 @@ Mass Earth	5.97E+24	Kg	5.972	massunits
 Earth moon 384400000	M	0.3844	Screen units
 T=2Pi.sqrt(a3/GM)	2371877.06400035	seconds	23.7187706400035	seconds
 	27.4522808333374	days		
+
+Images from https://nasa3d.arc.nasa.gov/images
