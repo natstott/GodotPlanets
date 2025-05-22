@@ -2,18 +2,23 @@
 
 [ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
 [ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
-[ext_resource type="Texture2D" uid="uid://clqx3uiriuu6x" path="res://moon-png-44668.png" id="2_frrwb"]
 [ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
+[ext_resource type="Texture2D" uid="uid://dleyffl0dsjk7" path="res://moon.png" id="3_hhxjg"]
 
 [sub_resource type="Environment" id="Environment_hhxjg"]
 ambient_light_color = Color(0.972549, 0.984314, 1, 1)
 ambient_light_energy = 11.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hhxjg"]
-transparency = 1
-albedo_texture = ExtResource("2_frrwb")
-billboard_mode = 1
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+albedo_texture = ExtResource("3_hhxjg")
+billboard_mode = 3
 billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
 
 [sub_resource type="QuadMesh" id="QuadMesh_k2cyx"]
 material = SubResource("StandardMaterial3D_hhxjg")
@@ -21,6 +26,7 @@ material = SubResource("StandardMaterial3D_hhxjg")
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.72034, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.77609, 0.630622, 0, -0.630622, 0.77609, 0.995237, 3.21347, 8.82938)
@@ -31,7 +37,7 @@ script = ExtResource("1_hhxjg")
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 script = ExtResource("1_5wkny")
 TestMesh = NodePath("MeshInstance3D")
-meshcount = 4096
+meshcount = 8192
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CodeMultimesh"]
 transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)

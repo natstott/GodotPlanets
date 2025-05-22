@@ -33,67 +33,74 @@ layout(set = 0, binding = 2, std430) restrict buffer VelocityBuffer {
 velocity_buffer;
 
 
-vec3 planet_pos (uint planet){
+//vec3 planet_pos (uint planet){
+
+//return vec3(my_data_buffer.data[planetdata+3],my_data_buffer.data[planetdata+7],my_data_buffer.data[planetdata+11]);
+
+//}
+
+struct Planet{
+vec3 vel;
+vec3 acc;
+vec3 pos;
+float mass;
+};
+
+Planet get_planet(uint planet){
+Planet thisplanet;
+
+thisplanet.vel = vec3(velocity_buffer.velocitydata[planet*8],velocity_buffer.velocitydata[planet*8+1],velocity_buffer.velocitydata[planet*8+2]);
+thisplanet.mass = velocity_buffer.velocitydata[planet*8+3];
+thisplanet.acc = vec3(velocity_buffer.velocitydata[planet*8+5], velocity_buffer.velocitydata[planet*8+6], velocity_buffer.velocitydata[planet*8+7]);
 uint planetdata=planet*12;
-return vec3(my_data_buffer.data[planetdata+3],my_data_buffer.data[planetdata+7],my_data_buffer.data[planetdata+11]);
-
+thisplanet.pos = vec3(my_data_buffer.data[planetdata+3],my_data_buffer.data[planetdata+7],my_data_buffer.data[planetdata+11]);
+return thisplanet;
 }
 
-vec3 planet_vel(uint planet){
-return vec3(velocity_buffer.velocitydata[planet*8],velocity_buffer.velocitydata[planet*8+1],velocity_buffer.velocitydata[planet*8+2]);
-
-}
-
-float planet_mass(uint planet){
-return velocity_buffer.velocitydata[planet*8+3];
-}
-
-vec3 planet_acc(uint planet){
-return vec3(velocity_buffer.velocitydata[planet*8+5], velocity_buffer.velocitydata[planet*8+6], velocity_buffer.velocitydata[planet*8+7]);
-
-}
-
-vec3 get_net_force(uint planet, uint other_planet) {
-    float mass1=planet_mass(planet);
-    float mass2=planet_mass(other_planet);
+vec3 get_net_force(float Gfactor,Planet planet, Planet other_planet) {
+    float mass2=other_planet.mass;
 	vec3 net_force = vec3(0., 0., 0.);
-	float distance = length(planet_pos(planet) - planet_pos(other_planet));
+	float distance = length(planet.pos - other_planet.pos);
 	if (distance == 0.) return net_force;
-	float force = parameter_buffer.BigG*mass1*mass2 / (distance * distance);
-	return normalize((planet_pos(other_planet) - planet_pos(planet)) * force);
+	float force = Gfactor*mass2 / (distance * distance);
+	return normalize((other_planet.pos - planet.pos) * force);
 }
 
 // The code we want to execute in each invocation
 void main() {
     // gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
-uint planet=gl_GlobalInvocationID.x;
-uint planetdata=planet*12;
+uint planetID=gl_GlobalInvocationID.x;
+Planet thisplanet=get_planet(planetID);
 
 	vec3 net_force = vec3(0., 0., 0.);
-    float DeltaTime=0.0001;
 
-			for (uint i = 0; i < parameter_buffer.planetcount; i++) {
-				if (i == planet) continue;
+    float Gfactor=parameter_buffer.BigG*thisplanet.mass;
+	   		for (uint i = 0; i < parameter_buffer.planetcount; i++) {
+				if (i == planetID) continue;
+                
 
-				net_force+=get_net_force(planet, i)*DeltaTime/planet_mass(planet);
+				net_force+=get_net_force(Gfactor, thisplanet, get_planet(i));
 			}
 
-vec3 newvelocity = planet_vel(planet) + net_force;
-vec3 newplanet=planet_pos(planet)+newvelocity*0.001;
+float DeltaTime=0.0001;
+net_force*=DeltaTime/thisplanet.mass;
 
+vec3 newvelocity=thisplanet.vel + net_force;
+thisplanet.pos+=newvelocity*0.001;
+uint planetdata=planetID*12;
 //set planet position in multimesh buffer
-    my_data_buffer.data[planetdata+3] =newplanet.x;
-    my_data_buffer.data[planetdata+7] =newplanet.y;
-    my_data_buffer.data[planetdata+11] =newplanet.z;
+    my_data_buffer.data[planetdata+3] =thisplanet.pos.x;
+    my_data_buffer.data[planetdata+7] =thisplanet.pos.y;
+    my_data_buffer.data[planetdata+11] =thisplanet.pos.z;
 
 //set planet velocity and acceleration in compute buffer
-velocity_buffer.velocitydata[planet*8] =newvelocity.x;
-velocity_buffer.velocitydata[planet*8+1]=newvelocity.y;
-velocity_buffer.velocitydata[planet*8+2] =newvelocity.z;
+velocity_buffer.velocitydata[planetID*8] =newvelocity.x;
+velocity_buffer.velocitydata[planetID*8+1]=newvelocity.y;
+velocity_buffer.velocitydata[planetID*8+2] =newvelocity.z;
 //force
-velocity_buffer.velocitydata[planet*8+4] =net_force.x;
-velocity_buffer.velocitydata[planet*8+5]=net_force.y;
-velocity_buffer.velocitydata[planet*8+6] =net_force.z;
+velocity_buffer.velocitydata[planetID*8+4] =net_force.x;
+velocity_buffer.velocitydata[planetID*8+5]=net_force.y;
+velocity_buffer.velocitydata[planetID*8+6] =net_force.z;
 
 
 
