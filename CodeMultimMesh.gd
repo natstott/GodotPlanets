@@ -1,18 +1,22 @@
 extends Marker3D
+
+@export var TestMesh :MeshInstance3D
+@export var meshcount :int
 var rd: RenderingDevice
 var multimeshid :RID
 var compute_list
 var pipeline
-@export var TestMesh :MeshInstance3D
-@export var meshcount :int
 var thismesh
 var meshbuffer :RID
 var firstrun :bool
 var tempbuffer
 var shader
 var uniform_set
+var verletpipeline
+var verletshader
+var verletuniform_set
 var velocities = []
-var BigG = 0.667; #0.00066743
+var BigG = 0.3667; #0.00066743
 
 
 
@@ -36,6 +40,14 @@ func _process(delta):
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	rd.compute_list_dispatch(compute_list,meshcount/32+1 , 1, 1)
 	rd.compute_list_end()
+	compute_list = rd.compute_list_begin()
+	rd.compute_list_bind_compute_pipeline(compute_list, verletpipeline)
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
+	rd.compute_list_dispatch(compute_list,meshcount/32+1 , 1, 1)
+	rd.compute_list_end()
+	
+	
+	
 	# Submit to GPU and wait for sync
 	# No longer needed as compute shader in main RD is dispatched automatically!
 	#rdlocal.submit()
@@ -53,12 +65,14 @@ func makeComputeShader():
 	var shader_file := load("res://Planetcompute.glsl")
 	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
 	shader = rd.shader_create_from_spirv(shader_spirv)
+	shader_file = load("res://PlanetVerlet.glsl")
+	shader_spirv = shader_file.get_spirv()
+	verletshader = rd.shader_create_from_spirv(shader_spirv)
+	
 	# Create a uniform to assign the buffer to the rendering device
 	var meshuniform := RDUniform.new()
 	meshuniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	meshuniform.binding = 0 # this needs to match the "binding" in our shader file
-	#var bufferbytes=tempbuffer.to_byte_array()
-	#meshbuffer = rdlocal.storage_buffer_create(bufferbytes.size(), bufferbytes)
 	meshbuffer=RenderingServer.multimesh_get_buffer_rd_rid(thismesh)
 	meshuniform.add_id(meshbuffer)
 	#velocities and accelerations in one buffer
@@ -78,16 +92,11 @@ func makeComputeShader():
 	print("ints ", byte_array_int.size(), " float ", byte_array_float.size(), " combo ", byte_array_params.size())
 	var parambuffer = rd.uniform_buffer_create(byte_array_params.size(), byte_array_params)
 	paramuniform.add_id(parambuffer)
+	
 	uniform_set = rd.uniform_set_create([meshuniform, paramuniform, velocityuniform], shader, 0) 
 	pipeline = rd.compute_pipeline_create(shader)
-	# the last parameter (the 0) needs to match the "set" in our shader file	
-	#var pipeline := rdlocal.compute_pipeline_create(shader)
-	#var compute_list := rdlocal.compute_list_begin()
-	#rdlocal.compute_list_bind_compute_pipeline(compute_list, pipeline)
-	#rdlocal.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
-	#rdlocal.compute_list_dispatch(compute_list,meshcount/32+1 , 1, 1)
-	#rdlocal.compute_list_end()
-
+	verletuniform_set = rd.uniform_set_create([meshuniform, paramuniform, velocityuniform], verletshader, 0) 
+	verletpipeline= rd.compute_pipeline_create(verletshader)
 
 ### Make test buffer in multimesh transform format
 func maketestbuffer():
@@ -104,7 +113,7 @@ func maketestbuffer():
 	tempbasis.x.y, tempbasis.y.y, tempbasis.z.y, temppos.origin.y, \
 	tempbasis.x.z, tempbasis.y.z, tempbasis.z.z, temppos.origin.z])
 		#Velocity buffer - 1:3 velocity, 4-mass 5:7 acceleration, 8 free
-		velocities.append_array([0.0,0.0, 0.0, 20000.0]); #Vx,Vy,Vz, M
+		velocities.append_array([0.0,0.0, 0.0, 50000.0]); #Vx,Vy,Vz, M
 		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
 	
 	var totalplanetmass=0
@@ -119,14 +128,14 @@ func maketestbuffer():
 		
 		var temppos = Transform3D.IDENTITY.scaled(Vector3(size,size,size))
 		#temppos = temppos.translated(Vector3((6+i/5000.0)*cos(circrand), randf_range(-1.0,1.0), (6+i/5000.0)*sin(circrand)))
-		temppos = temppos.translated(Vector3(radiusrand*cos(circrand), randf_range(-1.0,1.0), radiusrand*sin(circrand)))
+		temppos = temppos.translated(Vector3(radiusrand*cos(circrand), randf_range(-.10,.10), radiusrand*sin(circrand)))
 		var tempbasis = temppos.basis
 		# values laid out to match multimesh array
 		interimarray.append_array([tempbasis.x.x, tempbasis.y.x, tempbasis.z.x, temppos.origin.x, \
 	tempbasis.x.y, tempbasis.y.y, tempbasis.z.y, temppos.origin.y, \
 	tempbasis.x.z, tempbasis.y.z, tempbasis.z.z, temppos.origin.z])
 		# Array 1:3 velocity, 4-mass 5:7 acceleration, 8 free
-		velocities.append_array([6*temppos.origin.z+randf_range(-.1,.1),randf_range(-0.1,.1)\
+		velocities.append_array([6*temppos.origin.z+randf_range(-.1,.1),0.0\
 		, -6*temppos.origin.x+randf_range(-.1,.1),massrand]);
 		#velocities.append_array([0.0,randf_range(-0.1,.1), 0.0, massrand]);
 		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration

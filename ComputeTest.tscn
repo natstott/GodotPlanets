@@ -9,19 +9,16 @@
 ambient_light_color = Color(0.972549, 0.984314, 1, 1)
 ambient_light_energy = 11.2
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hhxjg"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k2cyx"]
 transparency = 2
 alpha_scissor_threshold = 0.5
 alpha_antialiasing_mode = 0
 albedo_texture = ExtResource("3_hhxjg")
-billboard_mode = 3
+billboard_mode = 1
 billboard_keep_scale = true
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
 
 [sub_resource type="QuadMesh" id="QuadMesh_k2cyx"]
-material = SubResource("StandardMaterial3D_hhxjg")
+material = SubResource("StandardMaterial3D_k2cyx")
 
 [node name="Node3D" type="Node3D"]
 
@@ -37,7 +34,7 @@ script = ExtResource("1_hhxjg")
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 script = ExtResource("1_5wkny")
 TestMesh = NodePath("Planetmesh")
-meshcount = 8192
+meshcount = 2048
 
 [node name="Planetmesh" type="MeshInstance3D" parent="CodeMultimesh"]
 visible = false

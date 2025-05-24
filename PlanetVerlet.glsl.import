@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cq3n17sx3uggg"
+path="res://.godot/imported/PlanetVerlet.glsl-fc29683363186c75edff019e4edd673b.res"
+
+[deps]
+
+source_file="res://PlanetVerlet.glsl"
+dest_files=["res://.godot/imported/PlanetVerlet.glsl-fc29683363186c75edff019e4edd673b.res"]
+
+[params]
+
