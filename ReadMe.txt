@@ -18,7 +18,7 @@ F=GMm/r^2
 Scaling- for realistic planets - to be updated
 1 screen unit =	1.00E+09	m	
 1 mass unit = 1.00E+24	kilograms
-1 second gamtime 1.00E+05	seconds
+1 second gametime 1.00E+05 seconds
 G unscaled	6.67E-11m3⋅kg−1⋅s−2
 G Scale	0.0000001
 G rescaled	0.00066743			

@@ -36,11 +36,10 @@ script = ExtResource("1_hhxjg")
 [node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh")]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
 script = ExtResource("1_5wkny")
-TestMesh = NodePath("MeshInstance3D")
+TestMesh = NodePath("Planetmesh")
 meshcount = 8192
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CodeMultimesh"]
-transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
+[node name="Planetmesh" type="MeshInstance3D" parent="CodeMultimesh"]
 visible = false
 mesh = SubResource("QuadMesh_k2cyx")
 
