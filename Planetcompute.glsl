@@ -56,19 +56,41 @@ Planet get_planet(uint planet){
 }
 
 
+
+
 vec3 get_net_force(float Gfactor,Planet planet, Planet other_planet) {
 
-	float distance = length(planet.pos - other_planet.pos);
+    vec3 separation=other_planet.pos-planet.pos;
+    float distance2=separation.x*separation.x+separation.y*separation.y+separation.z*separation.z;
+	float distance = sqrt(distance2);
+    vec3 netforce=vec3(0.0);
+    float elastic=50.0;
+    float drag = 1.0;
+/*
+if(distance<(planet.rad+other_planet.rad)/2.0){
 
-    float force = (distance < planet.rad)? -4.0*(planet.rad-distance) : Gfactor*other_planet.mass / (distance * distance);
-	return normalize((other_planet.pos - planet.pos)) * force;
+    float force = -elastic/(distance2*distance2*distance2);
+    netforce+= separation * force/planet.mass/distance;
+
+    vec3 dragforce=(other_planet.vel-planet.vel)*drag;
+    netforce+=dragforce;
+
+return netforce;
+    
+    }
+*/
+    netforce += (separation/distance)*Gfactor*other_planet.mass / distance2;
+	return  netforce;
+
 }
+
+
 
 // The code we want to execute in each invocation
 void main() {
     // gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
 
-    uint planetID=gl_GlobalInvocationID.x;
+    uint planetID=gl_GlobalInvocationID.x+1;
     Planet thisplanet=get_planet(planetID);
 
     vec3 oldacc=thisplanet.acc;
@@ -78,21 +100,17 @@ void main() {
     float Gfactor=parameter_buffer.BigG;
 
 
-//net-force is actually acceeration as planets own mass ignored.
+//net-force is actually acceleration as planets own mass ignored.
 
 	   		for (uint i = 0; i < parameter_buffer.planetcount; i++) {
 				if (i == planetID) continue;
             	net_force+=get_net_force(Gfactor, thisplanet, get_planet(i));
 			}
 
-float DeltaTime=0.001;
+float DeltaTime=parameter_buffer.DeltaTime;
 
 
-//vec3 newvelocity=thisplanet.vel + net_force*DeltaTime;
-//thisplanet.pos+=newvelocity*DeltaTime;
-	//boidBuffer[instanceId].acceleration = DeltaTime*LJForce / boidBuffer[instanceId].boidmass;
 
-	//boidBuffer[id.x].velocity =(boidBuffer[id.x].velocity + 0.5* (old_acc+boidBuffer[id.x].acceleration) * DeltaTime)*Cooling;
     
     thisplanet.acc = net_force*DeltaTime;
     thisplanet.vel+= 0.5*(oldacc+thisplanet.acc);

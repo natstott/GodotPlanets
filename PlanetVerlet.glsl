@@ -60,11 +60,11 @@ Planet get_planet(uint planet){
 void main() {
 
 
-    uint planetID=gl_GlobalInvocationID.x;
+    uint planetID=gl_GlobalInvocationID.x+1;
     Planet thisplanet=get_planet(planetID);
 
 
-float DeltaTime=0.001;
+float DeltaTime=parameter_buffer.DeltaTime;
 
 thisplanet.pos += thisplanet.vel * DeltaTime + 0.50*thisplanet.acc*DeltaTime*DeltaTime;
 

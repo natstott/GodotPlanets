@@ -1,0 +1,33 @@
+[gd_resource type="Shader" format=3 uid="uid://b0ncaps4tl1da"]
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx, depth_prepass_alpha;
+
+
+// Varyings
+varying float var_ArrayLayer;
+
+uniform int Total_layers;
+uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
+
+
+
+void vertex() {
+// VaryingSetter:2
+float id=float(INSTANCE_ID);
+float layers=float(Total_layers);
+float layernum = mod(id,layers);
+	var_ArrayLayer =layernum;
+}
+
+void fragment() {
+
+	float rad=2.0*length(UV-vec2(0.5));
+	vec3 tex_coord = vec3(UV.x, UV.y, var_ArrayLayer);
+	vec4 col = texture(Texture2DArrayParameter, tex_coord);
+	ALBEDO = vec3(col.xyz);
+	ALPHA = (rad>1.0)?0.0:1.0;
+
+}
+"

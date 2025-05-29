@@ -1,0 +1,115 @@
+[gd_resource type="VisualShader" load_steps=10 format=3 uid="uid://bj7ttjxyw2xt7"]
+
+[sub_resource type="VisualShaderNodeTexture2DArray" id="VisualShaderNodeTexture2DArray_ix048"]
+source = 1
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_7yk1y"]
+expanded_output_ports = [0]
+input_name = "uv"
+
+[sub_resource type="VisualShaderNodeVectorCompose" id="VisualShaderNodeVectorCompose_d88om"]
+
+[sub_resource type="VisualShaderNodeTexture2DArrayParameter" id="VisualShaderNodeTexture2DArrayParameter_njop3"]
+parameter_name = "Texture2DArrayParameter"
+texture_filter = 3
+
+[sub_resource type="VisualShaderNodeVaryingGetter" id="VisualShaderNodeVaryingGetter_ix048"]
+varying_name = "ArrayLayer"
+
+[sub_resource type="VisualShaderNodeVaryingSetter" id="VisualShaderNodeVaryingSetter_7yk1y"]
+varying_name = "ArrayLayer"
+
+[sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_sst5w"]
+operator = 3
+
+[sub_resource type="VisualShaderNodeIntParameter" id="VisualShaderNodeIntParameter_d88om"]
+parameter_name = "Layernumber"
+default_value_enabled = true
+default_value = 1
+
+[sub_resource type="VisualShaderNodeIntParameter" id="VisualShaderNodeIntParameter_njop3"]
+parameter_name = "Total_layers"
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+
+
+// Varyings
+varying float var_ArrayLayer;
+
+uniform int Layernumber = 1;
+uniform int Total_layers;
+uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
+
+
+
+void vertex() {
+// IntParameter:5
+	int n_out5p0 = Layernumber;
+
+
+// IntParameter:6
+	int n_out6p0 = Total_layers;
+
+
+// FloatOp:4
+	float n_out4p0 = float(n_out5p0) / float(n_out6p0);
+
+
+// VaryingSetter:2
+	var_ArrayLayer = n_out4p0;
+
+
+}
+
+void fragment() {
+// Input:3
+	vec2 n_out3p0 = UV;
+	float n_out3p1 = n_out3p0.r;
+	float n_out3p2 = n_out3p0.g;
+
+
+// VaryingGetter:7
+	float n_out7p0 = var_ArrayLayer;
+
+
+// VectorCompose:5
+	vec3 n_out5p0 = vec3(n_out3p1, n_out3p2, n_out7p0);
+
+
+	vec4 n_out2p0;
+// Texture2DArray:2
+	n_out2p0 = texture(Texture2DArrayParameter, n_out5p0);
+
+
+// Output:0
+	ALBEDO = vec3(n_out2p0.xyz);
+
+
+}
+"
+graph_offset = Vector2(-100, -66.5333)
+varyings/ArrayLayer = "0,0"
+nodes/vertex/0/position = Vector2(720, 140)
+nodes/vertex/2/node = SubResource("VisualShaderNodeVaryingSetter_7yk1y")
+nodes/vertex/2/position = Vector2(480, 380)
+nodes/vertex/4/node = SubResource("VisualShaderNodeFloatOp_sst5w")
+nodes/vertex/4/position = Vector2(260, 160)
+nodes/vertex/5/node = SubResource("VisualShaderNodeIntParameter_d88om")
+nodes/vertex/5/position = Vector2(-120, 100)
+nodes/vertex/6/node = SubResource("VisualShaderNodeIntParameter_njop3")
+nodes/vertex/6/position = Vector2(-100, 400)
+nodes/vertex/connections = PackedInt32Array(4, 0, 2, 0, 5, 0, 4, 0, 6, 0, 4, 1)
+nodes/fragment/0/position = Vector2(1000, 120)
+nodes/fragment/2/node = SubResource("VisualShaderNodeTexture2DArray_ix048")
+nodes/fragment/2/position = Vector2(700, 80)
+nodes/fragment/3/node = SubResource("VisualShaderNodeInput_7yk1y")
+nodes/fragment/3/position = Vector2(-120, 0)
+nodes/fragment/5/node = SubResource("VisualShaderNodeVectorCompose_d88om")
+nodes/fragment/5/position = Vector2(400, 100)
+nodes/fragment/6/node = SubResource("VisualShaderNodeTexture2DArrayParameter_njop3")
+nodes/fragment/6/position = Vector2(280, 480)
+nodes/fragment/7/node = SubResource("VisualShaderNodeVaryingGetter_ix048")
+nodes/fragment/7/position = Vector2(-40, 300)
+nodes/fragment/connections = PackedInt32Array(2, 0, 0, 0, 3, 1, 5, 0, 3, 2, 5, 1, 5, 0, 2, 0, 6, 0, 2, 2, 7, 0, 5, 2)
