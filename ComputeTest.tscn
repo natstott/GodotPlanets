@@ -1,12 +1,9 @@
-[gd_scene load_steps=18 format=3 uid="uid://lmjxrc5mx4d2"]
+[gd_scene load_steps=8 format=3 uid="uid://lmjxrc5mx4d2"]
 
 [ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
 [ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
 [ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
 [ext_resource type="Shader" uid="uid://b0ncaps4tl1da" path="res://TextureArray3.tres" id="3_4oi7q"]
-[ext_resource type="Texture2D" uid="uid://dleyffl0dsjk7" path="res://moon.png" id="3_hhxjg"]
-[ext_resource type="Shader" uid="uid://bj7ttjxyw2xt7" path="res://TextureArray.tres" id="3_k2cyx"]
-[ext_resource type="Script" uid="uid://co1dubf00mdae" path="res://testimagecreation.gd" id="5_qaoat"]
 
 [sub_resource type="Environment" id="Environment_hhxjg"]
 ambient_light_color = Color(0.972549, 0.984314, 1, 1)
@@ -19,31 +16,6 @@ shader_parameter/Total_layers = 6
 
 [sub_resource type="QuadMesh" id="QuadMesh_2aubu"]
 material = SubResource("ShaderMaterial_qaoat")
-
-[sub_resource type="Texture2DArray" id="Texture2DArray_qaoat"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_4oi7q"]
-render_priority = 0
-shader = ExtResource("3_k2cyx")
-shader_parameter/Layernumber = 1
-shader_parameter/Total_layers = 0
-shader_parameter/Texture2DArrayParameter = SubResource("Texture2DArray_qaoat")
-
-[sub_resource type="BoxMesh" id="BoxMesh_hhxjg"]
-material = SubResource("ShaderMaterial_4oi7q")
-
-[sub_resource type="SphereMesh" id="SphereMesh_k2cyx"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k2cyx"]
-transparency = 2
-alpha_scissor_threshold = 0.5
-alpha_antialiasing_mode = 0
-albedo_texture = ExtResource("3_hhxjg")
-
-[sub_resource type="QuadMesh" id="QuadMesh_qaoat"]
-material = SubResource("StandardMaterial3D_k2cyx")
-
-[sub_resource type="BoxMesh" id="BoxMesh_k2cyx"]
 
 [node name="Node3D" type="Node3D"]
 
@@ -67,21 +39,3 @@ mesh = SubResource("QuadMesh_2aubu")
 offset_right = 219.0
 offset_bottom = 66.0
 script = ExtResource("3_2aubu")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0.014)
-visible = false
-mesh = SubResource("BoxMesh_hhxjg")
-script = ExtResource("5_qaoat")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
-mesh = SubResource("SphereMesh_k2cyx")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D/MeshInstance3D"]
-transform = Transform3D(0.730127, 0, -0.683312, 0, 1, 0, 0.683312, 0, 0.730127, 1.67225, 0.413539, 0.47174)
-mesh = SubResource("QuadMesh_qaoat")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 10, 0, 0)
-mesh = SubResource("BoxMesh_k2cyx")

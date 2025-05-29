@@ -29,16 +29,16 @@ var num_planets=9
 func _ready():
 	# Create a local rendering device.
 	rd = RenderingServer.get_rendering_device() # global rd has access to main drawing thread
+	var texturearray = create_texturearray() #doing this first to count number of planets!
+	var meshmaterial=TestMesh.get_active_material( 0)
+	meshmaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
+	meshmaterial.set_shader_parameter("Total_Layers", num_planets)
 	tempbuffer = maketestbuffer() #starting values
 	print("v3: ", velocities[3])
 	thismesh=CreateMultimesh(meshcount)
 	makeComputeShader()
 	tempbuffer.clear() #free memory
-	var texturearray = create_texturearray()
-	var meshmaterial=TestMesh.get_active_material( 0)
-	meshmaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
-	meshmaterial.set_shader_parameter("Total_Layers", num_planets)
-	#	TestMesh.material_override.albedo_texture = texturearray
+
 	
 
 
@@ -128,7 +128,7 @@ func maketestbuffer():
 	tempbasis.x.y, tempbasis.y.y, tempbasis.z.y, temppos.origin.y, \
 	tempbasis.x.z, tempbasis.y.z, tempbasis.z.z, temppos.origin.z])
 		#Velocity buffer - 1:3 velocity, 4-mass 5:7 acceleration, 8 free
-		velocities.append_array([0.0,0.0, 0.0, solarmass]); #Vx,Vy,Vz, M
+		velocities.append_array([0.0, 0.0, 0.0, solarmass]); #Vx,Vy,Vz, M
 		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
 	
 	var totalplanetmass=0
@@ -136,7 +136,7 @@ func maketestbuffer():
 		var circrand=randf_range(-PI,PI)
 		var massrand=randf_range(.8,0.9)
 		var radiusrand=randf_range(4.0,20.0) 
-		if (i%(meshcount/9)==0): massrand=randf_range(50,200)
+		if (i<num_planets): massrand=randf_range(50,200)
 		totalplanetmass+=massrand
 		var size=sqrt(massrand)*0.1
 		var planetvel=sqrt(BigG*solarmass/radiusrand) # assume orbital velocity
@@ -155,7 +155,7 @@ func maketestbuffer():
 		#velocities.append_array([6*temppos.origin.z+randf_range(-.1,.1),0.0\
 		#, -6*temppos.origin.x+randf_range(-.1,.1),massrand]);
 		velocities.append_array([-planetvel*sin(circrand),0.0\
-	, planetvel*cos(circrand),massrand]);	
+	, planetvel*cos(circrand),massrand]);	# initial velocity is orbital
 		
 		#velocities.append_array([0.0,randf_range(-0.1,.1), 0.0, massrand]);
 		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration

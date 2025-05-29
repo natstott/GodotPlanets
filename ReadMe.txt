@@ -11,10 +11,14 @@ the multimesh buffer can be linked to the compute shader so
 it can be updated on the GPU - Originally I couldnt get this to work
 using multimesh_get_command_buffer_rd_rid until u/godot_clayjohn explained
 that a compute shader can run on the global renderingdevice but you will not
-be able to control when it is dispatched.
+be able to control when exactly it is dispatched.
+
+Now using Texture2DArray to store planet images and crudely using shader to apply
+them based on InstanceID.
 
 Basic function - implement gravity attraction between particles.
 F=GMm/r^2
+
 Scaling- for realistic planets - to be updated
 1 screen unit =	1.00E+09	m	
 1 mass unit = 1.00E+24	kilograms
@@ -29,4 +33,4 @@ Earth moon 384400000	M	0.3844	Screen units
 T=2Pi.sqrt(a3/GM)	2371877.06400035	seconds	23.7187706400035	seconds
 	27.4522808333374	days		
 
-Images from https://nasa3d.arc.nasa.gov/images
+Images from NASA and wikipedia
