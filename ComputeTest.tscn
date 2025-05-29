@@ -3,11 +3,9 @@
 [ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
 [ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
 [ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
-[ext_resource type="Shader" uid="uid://b0ncaps4tl1da" path="res://TextureArray3.tres" id="3_4oi7q"]
+[ext_resource type="Shader" uid="uid://b0ncaps4tl1da" path="res://PlanetShader.tres" id="3_4oi7q"]
 
 [sub_resource type="Environment" id="Environment_hhxjg"]
-ambient_light_color = Color(0.972549, 0.984314, 1, 1)
-ambient_light_energy = 11.2
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qaoat"]
 render_priority = 0
@@ -21,6 +19,7 @@ material = SubResource("ShaderMaterial_qaoat")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.72034, 0)
+visible = false
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.993696, -0.0379854, 0.10548, 0, 0.940851, 0.33882, -0.112111, -0.336684, 0.93492, 0.995237, 3.21347, 15.6164)

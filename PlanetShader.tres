@@ -1,0 +1,47 @@
+[gd_resource type="Shader" format=3 uid="uid://b0ncaps4tl1da"]
+
+[resource]
+code = "shader_type spatial;
+//render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx, depth_prepass_alpha;
+render_mode unshaded;
+
+// Varyings
+varying float var_ArrayLayer;
+
+uniform int Total_layers;
+uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
+
+
+
+void vertex() {
+// VaryingSetter:2
+float id=float(INSTANCE_ID);
+float layers=float(Total_layers);
+float layernum = mod(id,layers);
+	var_ArrayLayer =layernum;
+	// Billboard Mode: Enabled
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
+			MAIN_CAM_INV_VIEW_MATRIX[0],
+			MAIN_CAM_INV_VIEW_MATRIX[1],
+			MAIN_CAM_INV_VIEW_MATRIX[2],
+			MODEL_MATRIX[3]);
+
+	// Billboard Keep Scale: Enabled
+	MODELVIEW_MATRIX = MODELVIEW_MATRIX * mat4(
+			vec4(length(MODEL_MATRIX[0].xyz), 0.0, 0.0, 0.0),
+			vec4(0.0, length(MODEL_MATRIX[1].xyz), 0.0, 0.0),
+			vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0),
+			vec4(0.0, 0.0, 0.0, 1.0));
+	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
+}
+
+void fragment() {
+
+	float rad=2.0*length(UV-vec2(0.5));
+	vec3 tex_coord = vec3(UV.x, UV.y, var_ArrayLayer);
+	vec4 col = texture(Texture2DArrayParameter, tex_coord);
+	ALBEDO = vec3(col.xyz);
+	ALPHA = (rad>1.0)?0.0:1.0;
+
+}
+"
