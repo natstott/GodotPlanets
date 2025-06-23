@@ -118,9 +118,9 @@ float DeltaTime=parameter_buffer.DeltaTime;
 
 uint planetdata=planetID*12;
 //set planet position in multimesh buffer
-    my_data_buffer.data[planetdata+3] =thisplanet.pos.x;
-    my_data_buffer.data[planetdata+7] =thisplanet.pos.y;
-    my_data_buffer.data[planetdata+11] =thisplanet.pos.z;
+//    my_data_buffer.data[planetdata+3] =thisplanet.pos.x;
+//    my_data_buffer.data[planetdata+7] =thisplanet.pos.y;
+//    my_data_buffer.data[planetdata+11] =thisplanet.pos.z;
 
 //set planet velocity and acceleration in compute buffer
 velocity_buffer.velocitydata[planetID*8] =thisplanet.vel.x;

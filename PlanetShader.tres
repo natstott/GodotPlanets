@@ -8,7 +8,7 @@ render_mode unshaded;
 // Varyings
 varying float var_ArrayLayer;
 
-uniform int Total_layers;
+uniform float Total_layers;
 uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
 
 
@@ -17,6 +17,7 @@ void vertex() {
 // VaryingSetter:2
 float id=float(INSTANCE_ID);
 float layers=float(Total_layers);
+
 float layernum = mod(id,layers);
 	var_ArrayLayer =layernum;
 	// Billboard Mode: Enabled
@@ -38,10 +39,11 @@ float layernum = mod(id,layers);
 void fragment() {
 
 	float rad=2.0*length(UV-vec2(0.5));
+	if(rad>1.0) discard;
 	vec3 tex_coord = vec3(UV.x, UV.y, var_ArrayLayer);
 	vec4 col = texture(Texture2DArrayParameter, tex_coord);
 	ALBEDO = vec3(col.xyz);
-	ALPHA = (rad>1.0)?0.0:1.0;
-
+	//ALPHA = (rad>1.0)?0.0:1.0;
+	//	ALPHA_SCISSOR_THRESHOLD = 0.01;
 }
 "

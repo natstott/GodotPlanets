@@ -66,7 +66,7 @@ void main() {
 
 float DeltaTime=parameter_buffer.DeltaTime;
 
-thisplanet.pos += thisplanet.vel * DeltaTime + 0.50*thisplanet.acc*DeltaTime*DeltaTime;
+thisplanet.pos += thisplanet.vel * DeltaTime + 0.50*thisplanet.acc*DeltaTime;
 
 
 // Write data to buffers

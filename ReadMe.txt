@@ -13,24 +13,12 @@ using multimesh_get_command_buffer_rd_rid until u/godot_clayjohn explained
 that a compute shader can run on the global renderingdevice but you will not
 be able to control when exactly it is dispatched.
 
-Now using Texture2DArray to store planet images and crudely using shader to apply
-them based on InstanceID.
+Now using Texture2DArray to store planet images and using simple instance id to
+draw them using a sphere impostor based on :https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
+by Ben Golus
 
 Basic function - implement gravity attraction between particles.
 F=GMm/r^2
 
-Scaling- for realistic planets - to be updated
-1 screen unit =	1.00E+09	m	
-1 mass unit = 1.00E+24	kilograms
-1 second gametime 1.00E+05 seconds
-G unscaled	6.67E-11m3⋅kg−1⋅s−2
-G Scale	0.0000001
-G rescaled	0.00066743			
-
-Check			scaled	
-Mass Earth	5.97E+24	Kg	5.972	massunits
-Earth moon 384400000	M	0.3844	Screen units
-T=2Pi.sqrt(a3/GM)	2371877.06400035	seconds	23.7187706400035	seconds
-	27.4522808333374	days		
 
 Images from NASA and wikipedia

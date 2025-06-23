@@ -20,6 +20,7 @@ var BigG = 0.667; #0.00066743
 var DeltaTime=0.001
 var solarmass=50000.0
 var num_planets=9
+var paused=false
 
 
 
@@ -32,7 +33,7 @@ func _ready():
 	var texturearray = create_texturearray() #doing this first to count number of planets!
 	var meshmaterial=TestMesh.get_active_material( 0)
 	meshmaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
-	meshmaterial.set_shader_parameter("Total_Layers", num_planets)
+	meshmaterial.set_shader_parameter("Total_Layers", num_planets*1.0)
 	tempbuffer = maketestbuffer() #starting values
 	print("v3: ", velocities[3])
 	thismesh=CreateMultimesh(meshcount)
@@ -44,7 +45,7 @@ func _ready():
 
 func _process(delta):
 	# Create a compute pipeline
-	if(true):
+	if(!paused):
 		var dispatchnumber=meshcount-1 # not updating sun
 		compute_list = rd.compute_list_begin()
 		rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
@@ -56,6 +57,8 @@ func _process(delta):
 		rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 		rd.compute_list_dispatch(compute_list,dispatchnumber/32+1 , 1, 1)
 		rd.compute_list_end()
+	if Input.is_action_just_pressed("Pause"): paused =!paused
+	
 	
 	
 	
@@ -122,6 +125,7 @@ func maketestbuffer():
 		
 		var temppos = Transform3D.IDENTITY.scaled(Vector3(3,3,3))
 		var tempbasis = temppos.basis
+		#temppos = temppos.translated(Vector3(2.0,0.0,0.0)) #temporary test position
 		print("tempbasis: ", tempbasis.x.x)
 		# values laid out to match multimesh array
 		interimarray.append_array([tempbasis.x.x, tempbasis.y.x, tempbasis.z.x, temppos.origin.x, \
@@ -186,24 +190,26 @@ func CreateMultimesh(size):
 	return multimeshid
 	
 func create_texturearray():
+	# textures from https://www.solarsystemscope.com/textures/
 	var texturearray :Texture2DArray = Texture2DArray.new()
 	var images :Array[Image] = []
-	var imagelist =["sun.jpg", "mercury.png", "venus.png", "Earth.jpeg","mars.jpg","Jupiter.jpeg", "saturn.jpg", "uranus.jpg","moon.png" ]
+	var imagelist =["8k_sun.jpg", "8k_mercury.jpg", "8k_venus_surface.jpg", "8k_earth_daymap.jpg","8k_mars.jpg","8k_jupiter.jpg", "8k_saturn.jpg", "2k_uranus.jpg","8k_moon.jpg" ]
+	#var imagelist =["2k_sun.jpg","testerror.jpg", "mercury.png", "venus.png", "Earth.jpeg","Mars.jpeg","Jupiter.jpeg", "saturn.jpg", "uranus.jpg","moon.png" ]
+	
 	for filename in imagelist:
 		var img=Image.new()
 		var file_path="res://"+filename
-		var temptexture = load(file_path)
-		img = temptexture.get_image()
-		img.decompress()
-		img.resize(256,256)
-		img.convert(Image.FORMAT_RGB8)
-		img.generate_mipmaps()
-		images.append(img)
-		print("Loaded image from: %s" % filename)
-		#var loadimage = load("res://"+filename)
-		#var tempimage = loadimage.get_image()
+		if ResourceLoader.exists(file_path):
+			var temptexture = load(file_path)
+			img = temptexture.get_image()
+			img.decompress()
+			img.resize(2048,1024)
+			img.convert(Image.FORMAT_RGB8)
+			img.generate_mipmaps()
+			images.append(img)
+			print("Loaded image from: %s" % filename)
+		else:print("Error loading: %s" %filename )
 		
-		#images.append([tempimage])
 	num_planets=images.size()
 	texturearray.create_from_images(images)
 	#texturearray.save_png("res:\\testtexturearray")
