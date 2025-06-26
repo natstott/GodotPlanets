@@ -24,6 +24,9 @@ layout(set = 0, binding = 1) restrict uniform ParameterBuffer {
 }
 parameter_buffer;
 
+uint stride=12;// 12 by default, this will need to be 16 or 20 if colour/custom is used
+// custom is now used so 16
+
 // velocity, acceleration and mass buffer
 layout(set = 0, binding = 2, std430) restrict buffer VelocityBuffer {
     float velocitydata[];
@@ -49,7 +52,7 @@ Planet get_planet(uint planet){
     thisplanet.vel = vec3(velocity_buffer.velocitydata[planet*8],velocity_buffer.velocitydata[planet*8+1],velocity_buffer.velocitydata[planet*8+2]);
     thisplanet.mass = velocity_buffer.velocitydata[planet*8+3];
     thisplanet.acc = vec3(velocity_buffer.velocitydata[planet*8+4], velocity_buffer.velocitydata[planet*8+5], velocity_buffer.velocitydata[planet*8+6]);
-    uint planetdata=planet*12;// this will need to be 16 or 20 if colour/custom is used
+    uint planetdata=planet*stride;// this will need to be 16 or 20 if colour/custom is used
     thisplanet.pos = vec3(my_data_buffer.data[planetdata+3],my_data_buffer.data[planetdata+7],my_data_buffer.data[planetdata+11]);// based on transform buffer in multimesh
     thisplanet.rad= my_data_buffer.data[planetdata]; //actually scale.x
     return thisplanet;

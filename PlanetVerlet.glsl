@@ -24,6 +24,9 @@ layout(set = 0, binding = 1) restrict uniform ParameterBuffer {
 }
 parameter_buffer;
 
+uint stride=12;// 12 by default, this will need to be 16 or 20 if colour/custom is used
+//custom is now used so 16 stride
+
 // velocity, acceleration and mass buffer
 layout(set = 0, binding = 2, std430) restrict buffer VelocityBuffer {
     float velocitydata[];
@@ -39,6 +42,7 @@ struct Planet{
     vec3 vel;
     vec3 acc;
     vec3 pos;
+    //mat3x3 basis;
     float mass;
     float rad;
     };
@@ -49,11 +53,22 @@ Planet get_planet(uint planet){
     thisplanet.vel = vec3(velocity_buffer.velocitydata[planet*8],velocity_buffer.velocitydata[planet*8+1],velocity_buffer.velocitydata[planet*8+2]);
     thisplanet.mass = velocity_buffer.velocitydata[planet*8+3];
     thisplanet.acc = vec3(velocity_buffer.velocitydata[planet*8+4], velocity_buffer.velocitydata[planet*8+5], velocity_buffer.velocitydata[planet*8+6]);
-    uint planetdata=planet*12;// this will need to be 16 or 20 if colour/custom is used
+    uint planetdata=planet*stride;// this will need to be 16 or 20 if colour/custom is used
     thisplanet.pos = vec3(my_data_buffer.data[planetdata+3],my_data_buffer.data[planetdata+7],my_data_buffer.data[planetdata+11]);// based on transform buffer in multimesh
+
     thisplanet.rad= my_data_buffer.data[planetdata]; //actually scale.x
     return thisplanet;
 }
+
+/*
+Adding rotation matrix
+For Transform3D the float-order is: (basis.x.x, basis.y.x, basis.z.x, origin.x, basis.x.y, basis.y.y, basis.z.y, origin.y, basis.x.z, basis.y.z, basis.z.z, origin.z).
+
+    thisplanet.basis=mat3x3(my_data_buffer.data[planetdata],my_data_buffer.data[planetdata+1],my_data_buffer.data[planetdata+2],
+                            my_data_buffer.data[planetdata+4],my_data_buffer.data[planetdata+5],my_data_buffer.data[planetdata+6],
+                            my_data_buffer.data[planetdata+8],my_data_buffer.data[planetdata+9],my_data_buffer.data[planetdata+10]);
+
+*/
 
 
 // The code we want to execute in each invocation
@@ -70,7 +85,7 @@ thisplanet.pos += thisplanet.vel * DeltaTime + 0.50*thisplanet.acc*DeltaTime;
 
 
 // Write data to buffers
-uint planetdata=planetID*12;
+uint planetdata=planetID*stride;
 //set planet position in multimesh buffer
     my_data_buffer.data[planetdata+3] =thisplanet.pos.x;
     my_data_buffer.data[planetdata+7] =thisplanet.pos.y;

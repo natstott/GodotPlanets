@@ -125,8 +125,6 @@ func maketestbuffer():
 		
 		var temppos = Transform3D.IDENTITY.scaled(Vector3(3,3,3))
 		var tempbasis = temppos.basis
-		#temppos = temppos.translated(Vector3(2.0,0.0,0.0)) #temporary test position
-		print("tempbasis: ", tempbasis.x.x)
 		# values laid out to match multimesh array
 		interimarray.append_array([tempbasis.x.x, tempbasis.y.x, tempbasis.z.x, temppos.origin.x, \
 	tempbasis.x.y, tempbasis.y.y, tempbasis.z.y, temppos.origin.y, \
@@ -138,7 +136,7 @@ func maketestbuffer():
 	var totalplanetmass=0
 	for i in range (meshcount-suns):
 		var circrand=randf_range(-PI,PI)
-		var massrand=randf_range(.8,0.9)
+		var massrand=randf_range(.3,0.5)
 		var radiusrand=randf_range(4.0,20.0) 
 		if (i<num_planets): massrand=randf_range(50,200)
 		totalplanetmass+=massrand
@@ -151,10 +149,14 @@ func maketestbuffer():
 		#temppos = temppos.translated(Vector3((6+i/5000.0)*cos(circrand), randf_range(-1.0,1.0), (6+i/5000.0)*sin(circrand)))
 		temppos = temppos.translated(Vector3(radiusrand*cos(circrand), randf_range(-.10,.10), radiusrand*sin(circrand)))
 		var tempbasis = temppos.basis
+		var custom :Vector4 = Vector4(0,0,0,0)
+		var colour :Vector4 = Vector4(0,0,0,0)
 		# values laid out to match multimesh array
 		interimarray.append_array([tempbasis.x.x, tempbasis.y.x, tempbasis.z.x, temppos.origin.x, \
 	tempbasis.x.y, tempbasis.y.y, tempbasis.z.y, temppos.origin.y, \
-	tempbasis.x.z, tempbasis.y.z, tempbasis.z.z, temppos.origin.z])
+	tempbasis.x.z, tempbasis.y.z, tempbasis.z.z, temppos.origin.z ])#, \
+	#colour, custom.x])
+	
 		# Array 1:3 velocity, 4-mass 5:7 acceleration, 8 free
 		#velocities.append_array([6*temppos.origin.z+randf_range(-.1,.1),0.0\
 		#, -6*temppos.origin.x+randf_range(-.1,.1),massrand]);
@@ -177,14 +179,14 @@ func CreateMultimesh(size):
 	multimeshid,\
 	size,\
 	RenderingServer.MultimeshTransformFormat.MULTIMESH_TRANSFORM_3D,\
-	false, false) #colours, custom
+	false, false,false) #colours, custom, useindirect
 	
 	RenderingServer.multimesh_set_mesh(multimeshid, TestMesh.mesh.get_rid())
 	RenderingServer.multimesh_set_buffer(multimeshid,tempbuffer)
 	var aabb = Vector3(512.0, 1000.0, 512.0)
 	var instance = RenderingServer.instance_create()
 	var scenario =  get_world_3d().scenario
-	RenderingServer.instance_set_custom_aabb(instance,AABB(-aabb,aabb))
+	RenderingServer.instance_set_custom_aabb(instance,AABB(-aabb,2*aabb))
 	RenderingServer.instance_set_scenario(instance,scenario)
 	RenderingServer.instance_set_base(instance,multimeshid)
 	return multimeshid
@@ -193,7 +195,9 @@ func create_texturearray():
 	# textures from https://www.solarsystemscope.com/textures/
 	var texturearray :Texture2DArray = Texture2DArray.new()
 	var images :Array[Image] = []
-	var imagelist =["8k_sun.jpg", "8k_mercury.jpg", "8k_venus_surface.jpg", "8k_earth_daymap.jpg","8k_mars.jpg","8k_jupiter.jpg", "8k_saturn.jpg", "2k_uranus.jpg","8k_moon.jpg" ]
+	var imagelist =["8k_sun.jpg", "8k_mercury.jpg", "8k_venus_surface.jpg", \
+	"8k_earth_daymap.jpg","8k_mars.jpg","8k_jupiter.jpg", "8k_saturn.jpg", \
+	"2k_uranus.jpg", "2k_neptune.jpg", "8k_moon.jpg","4k_ceres_fictional.jpg","4k_eris_fictional.jpg" ]
 	#var imagelist =["2k_sun.jpg","testerror.jpg", "mercury.png", "venus.png", "Earth.jpeg","Mars.jpeg","Jupiter.jpeg", "saturn.jpg", "uranus.jpg","moon.png" ]
 	
 	for filename in imagelist:
@@ -203,8 +207,8 @@ func create_texturearray():
 			var temptexture = load(file_path)
 			img = temptexture.get_image()
 			img.decompress()
-			img.resize(2048,1024)
-			img.convert(Image.FORMAT_RGB8)
+			img.resize(4096,2048)
+			#img.convert(Image.FORMAT_RGB8)
 			img.generate_mipmaps()
 			images.append(img)
 			print("Loaded image from: %s" % filename)
@@ -216,3 +220,7 @@ func create_texturearray():
 	return texturearray
 	
 	
+
+
+func _on_h_slider_value_changed(value: float) -> void:
+	TestMesh.get_active_material(0).set_shader_parameter("sphere_radius", value)

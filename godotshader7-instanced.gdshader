@@ -15,82 +15,72 @@ uniform float Total_layers;
 uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
 //uniform mat4 inv_model_matrix;
 
-uniform float sphere_radius = .50; // match Unity's hardcoded 0.5
+uniform float sphere_radius = 1.0; // match Unity's hardcoded 0.5
 varying float var_ArrayLayer;
 varying vec3 rayDir;
 varying vec3 rayOrigin;
-varying vec4 pos;
+varying vec3 vertexpos;
 
 void vertex() {
 
-	//instance layer of image
+	//instance layer of image for Tecture2Darray layer.
 float id=float(INSTANCE_ID);
 float layers=float(Total_layers);
 float layernum = mod(id,layers);
 var_ArrayLayer =layernum;
 
-    // Camera-aligned billboard logic (simplified)
-vec3 worldSpaceViewerPos    = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-
-//vec3 cam_forward = -INV_VIEW_MATRIX[2].xyz; // negated to match Godot’s forward
+//camera position
+//vec3 worldSpaceViewerPos    = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+vec3 worldSpaceViewerPos=CAMERA_POSITION_WORLD;
 vec3 worldSpacePivotPos = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 // offset between pivot and camera
 vec3 worldSpacePivotToView = worldSpaceViewerPos - worldSpacePivotPos;
 
-/*
-float maxScale = max(length(MODEL_MATRIX[0].xyz), max(length(MODEL_MATRIX[1].xyz), length(MODEL_MATRIX[2].xyz)));
-vec3 cam_up     = INV_VIEW_MATRIX[1].xyz;
-vec3 forward = normalize(worldSpacePivotToView);
-vec3 cam_right  = normalize(cross(forward,cam_up));
-cam_up= cross(cam_right,forward); // This is what Ben Golus does though it does seem circular?
-mat3 quadOriemtationMatrix = mat3(cam_right, forward, cam_up);
 
- float maxRadius = maxScale * sphere_radius;
-*/
-/*
-//OLD VERSION
-    // Camera-aligned billboard logic (simplified)
-vec3 cam_right  = normalize(MAIN_CAM_INV_VIEW_MATRIX[0].xyz);
+   // Camera-facing billboard logic = BGolus
+//Make the quad face the camera, not the view direction
 vec3 cam_up     = normalize(MAIN_CAM_INV_VIEW_MATRIX[1].xyz);
-vec3 cam_forward = normalize(-MAIN_CAM_INV_VIEW_MATRIX[2].xyz); // negated to match Godot’s forward
-vec3 cam_pos    = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
-    vec3 pivot = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    float scale = max(length(MODEL_MATRIX[0].xyz), max(length(MODEL_MATRIX[1].xyz), length(MODEL_MATRIX[2].xyz)));
-    vec3 quad_pos = pivot +
-                    (VERTEX.x * scale) * cam_right +
-                    (VERTEX.y * scale) * cam_up;
+vec3 cam_forward = normalize(worldSpacePivotToView);
+vec3 cam_right = normalize(cross(cam_forward, cam_up));
+//redo cam_up to ensure it is perpendicular - Not sure why it wouldnt be but hey.
+cam_up = cross(cam_right, cam_forward);
 
-    vec3 worldPos = quad_pos;
-*/
-    // Camera-aligned billboard logic (simplified)
-vec3 cam_right  = normalize(MAIN_CAM_INV_VIEW_MATRIX[0].xyz);
-vec3 cam_up     = normalize(MAIN_CAM_INV_VIEW_MATRIX[1].xyz);
-vec3 cam_forward = normalize(-MAIN_CAM_INV_VIEW_MATRIX[2].xyz); // negated to match Godot’s forward
-vec3 cam_pos    = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
-    vec3 pivot = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    float scale = max(length(MODEL_MATRIX[0].xyz), max(length(MODEL_MATRIX[1].xyz), length(MODEL_MATRIX[2].xyz)));
-    vec3 quad_pos = pivot +
-                    (VERTEX.x * scale) * cam_right +
-                    (VERTEX.y * scale) * cam_up;
+float scale = max(length(MODEL_MATRIX[0].xyz), max(length(MODEL_MATRIX[1].xyz), length(MODEL_MATRIX[2].xyz)));
+//BG quad scaling to fit
+                    float maxRadius=sphere_radius*scale;
+                    // get the sine of the right triangle with the hyp of the sphere pivot distance and the opp of the sphere radius
+                    float sinAngle = maxRadius / length(worldSpacePivotToView);
+                    // convert to cosine
+                    float cosAngle = sqrt(1.0 - sinAngle * sinAngle);
+                    // convert to tangent
+                    float tanAngle = sinAngle / cosAngle;
+                    // basically this, but should be faster
+                    //tanAngle = tan(asin(sinAngle));
+                    // get the opp of the right triangle with the 90 degree at the sphere pivot * 2
+                    float quadScale = tanAngle * length(worldSpacePivotToView) * 2.0;
 
 
+vec3 quad_pos = (mat3(cam_right,cam_up,cam_forward)*VERTEX.xyz)*quadScale+worldSpacePivotPos;
 
-	
 	//vec3 worldPos =worldSpacePivotPos + quadOriemtationMatrix*(VERTEX.xyz*maxScale);
 
     vec3 worldSpaceRayOrigin = worldSpaceViewerPos;
     vec3 worldSpaceRayDir = quad_pos - worldSpaceRayOrigin;
 mat4    INV_MODEL_MATRIX = inverse(MODEL_MATRIX);
-//Assuming same as unityWorldToObject
-	    VERTEX = (INV_MODEL_MATRIX * vec4(quad_pos, 1.0)).xyz;
 
 
+
+
+// convert to model space to use in fragment, after varying adjustment
 	rayDir=(INV_MODEL_MATRIX*vec4(worldSpaceRayDir,0.0)).xyz;
 	rayOrigin=(INV_MODEL_MATRIX*vec4(worldSpaceRayOrigin,1.0)).xyz;
-
+	VERTEX = (INV_MODEL_MATRIX * vec4(quad_pos, 1.0)).xyz;
+	vertexpos=quad_pos;
 	//pos = vec4(quad_pos,1.0); //Do we need to calculate new clip position?
-}
+}// End of Vertex
 
+// calculate length of ray to sphere
+// https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
 float ray_sphere_intersect(vec3 ro, vec3 rd, vec3 center, float radius) {
     vec3 oc = ro - center;
     float b = dot(oc, rd);
@@ -108,7 +98,7 @@ void fragment() {
     //vec3 obj_origin = (Model_Matrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     vec3 obj_origin = vec3(0.0, 0.0, 0.0);
 
-    float t = ray_sphere_intersect(ray_origin, ray_dir, obj_origin, 0.5);
+    float t = ray_sphere_intersect(ray_origin, ray_dir, obj_origin, sphere_radius);
 
     if (t < 0.0) {
         discard;
@@ -121,13 +111,19 @@ void fragment() {
         float phi = atan(normal.z, normal.x) / (2.0 * PI);
         float phi_frac = fract(phi);
         float theta = -acos(-normal.y) / PI;
-        //vec2 uv = vec2(phi_frac, theta);
-        //color = texture(equirect_texture, uv).rgb;
 		vec3 tex_coord = vec3(phi_frac, theta, var_ArrayLayer);
 		vec4 col = texture(Texture2DArrayParameter, tex_coord);
 		//col =vec4(.5);
-        ALBEDO = col.rgb;
-	//NORMAL=normalize(hit_pos);
+		/*
+		Try adding sunlight from origin?
+		vec3 sundirection=
+    DIFFUSE_LIGHT += dot(NORMAL, LIGHT) * ATTENUATION * ALBEDO;
+
+		*/
+		float sundistance=length(vertexpos);
+		float brightness=(var_ArrayLayer>0.1)? max(0.05,dot(normal,-normalize(vertexpos))):1.0;
+        ALBEDO = col.rgb*brightness;
+
 
     // Optional: Manual lighting (Godot 4.x has `LIGHT` keyword but lighting here is unshaded)
 }

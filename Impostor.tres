@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://chb1wm7f7aqfb"]
+
+[ext_resource type="Shader" uid="uid://cxi3e0ornovb0" path="res://godotshader7-instanced.gdshader" id="1_44obi"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_44obi")
+shader_parameter/albedo_color = Color(0.421348, 0.421348, 0.421348, 1)
+shader_parameter/Total_layers = 9.0
+shader_parameter/sphere_radius = 1.0

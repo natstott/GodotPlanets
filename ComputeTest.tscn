@@ -1,29 +1,18 @@
-[gd_scene load_steps=10 format=3 uid="uid://lmjxrc5mx4d2"]
+[gd_scene load_steps=9 format=3 uid="uid://lmjxrc5mx4d2"]
 
 [ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
 [ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
 [ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
-[ext_resource type="Shader" uid="uid://cxi3e0ornovb0" path="res://godotshader7-instanced.gdshader" id="3_k2cyx"]
+[ext_resource type="Material" uid="uid://chb1wm7f7aqfb" path="res://Impostor.tres" id="3_k2cyx"]
 [ext_resource type="Material" uid="uid://dp74jmd3kioa" path="res://TransparencyTest.tres" id="5_k2cyx"]
 
-[sub_resource type="Environment" id="Environment_hhxjg"]
-background_mode = 1
-background_energy_multiplier = 2.51
-ambient_light_source = 2
-ambient_light_color = Color(0.769995, 0.769995, 0.769995, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_qaoat"]
-render_priority = 0
-shader = ExtResource("3_k2cyx")
-shader_parameter/albedo_color = Color(0.421348, 0.421348, 0.421348, 1)
-shader_parameter/Total_layers = 9.0
-shader_parameter/sphere_radius = 1.0
-
 [sub_resource type="QuadMesh" id="QuadMesh_2aubu"]
-material = SubResource("ShaderMaterial_qaoat")
+material = ExtResource("3_k2cyx")
 
 [sub_resource type="QuadMesh" id="QuadMesh_4oi7q"]
 material = ExtResource("5_k2cyx")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_k2cyx"]
 
 [node name="Node3D" type="Node3D"]
 
@@ -33,22 +22,19 @@ visible = false
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.995237, 3.21347, 15.6164)
-environment = SubResource("Environment_hhxjg")
+current = true
+far = 50.81
 script = ExtResource("1_hhxjg")
+mousespeed = 0.05
 
 [node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh")]
 script = ExtResource("1_5wkny")
 TestMesh = NodePath("PlanetMesh")
-meshcount = 32
+meshcount = 6400
 
 [node name="PlanetMesh" type="MeshInstance3D" parent="CodeMultimesh"]
 visible = false
 mesh = SubResource("QuadMesh_2aubu")
-
-[node name="FPSLabel" type="Label" parent="."]
-offset_right = 219.0
-offset_bottom = 66.0
-script = ExtResource("3_2aubu")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.52911, 0, 0)
@@ -59,3 +45,37 @@ mesh = SubResource("QuadMesh_4oi7q")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.50056, 0, 0)
 visible = false
 mesh = SubResource("QuadMesh_4oi7q")
+
+[node name="Control" type="Control" parent="."]
+custom_minimum_size = Vector2(500, 300)
+layout_mode = 3
+anchor_right = 0.512
+anchor_bottom = 0.219
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 183.712
+offset_bottom = 177.808
+mouse_default_cursor_shape = 2
+
+[node name="VSplitContainer" type="VSplitContainer" parent="Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="FPSLabel" type="Label" parent="Control/VSplitContainer"]
+custom_minimum_size = Vector2(200, 100)
+layout_mode = 2
+script = ExtResource("3_2aubu")
+
+[node name="HSlider" type="HSlider" parent="Control/VSplitContainer"]
+material = SubResource("CanvasItemMaterial_k2cyx")
+custom_minimum_size = Vector2(400, 100)
+layout_mode = 2
+min_value = 0.1
+max_value = 20.0
+step = 0.1
+value = 1.0
+tick_count = 20
+ticks_on_borders = true
+
+[connection signal="value_changed" from="Control/VSplitContainer/HSlider" to="CodeMultimesh" method="_on_h_slider_value_changed"]
