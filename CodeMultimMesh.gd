@@ -2,6 +2,8 @@ extends Marker3D
 
 @export var TestMesh :MeshInstance3D
 @export var meshcount :int
+@export var testlayermaterial :Material
+var testlayernum=0.0
 var rd: RenderingDevice
 var multimeshid :RID
 var compute_list
@@ -19,7 +21,7 @@ var velocities = []
 var BigG = 0.667; #0.00066743
 var DeltaTime=0.001
 var solarmass=50000.0
-var num_planets=9
+var num_planets=15
 var paused=false
 
 
@@ -28,7 +30,7 @@ var paused=false
 
 
 func _ready():
-	# Create a local rendering device.
+	# Create a global rendering device which can access multimesh data
 	rd = RenderingServer.get_rendering_device() # global rd has access to main drawing thread
 	var texturearray = create_texturearray() #doing this first to count number of planets!
 	var meshmaterial=TestMesh.get_active_material( 0)
@@ -39,6 +41,7 @@ func _ready():
 	thismesh=CreateMultimesh(meshcount)
 	makeComputeShader()
 	tempbuffer.clear() #free memory
+	testlayermaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
 
 	
 
@@ -59,18 +62,13 @@ func _process(delta):
 		rd.compute_list_end()
 	if Input.is_action_just_pressed("Pause"): paused =!paused
 	
+	if Input.is_action_just_pressed("Flipcolour"):
+		testlayermaterial.set_shader_parameter("Layer", testlayernum)
+		testlayernum = (testlayernum+.10)-int(testlayernum/num_planets)*num_planets
+		
 	
 	
-	
-	# Submit to GPU and wait for sync
-	# No longer needed as compute shader in main RD is dispatched automatically!
-	#rdlocal.submit()
-	#rdlocal.sync()
-	# return bytes from compute shader and send to multimesh
-	#var output_bytes := rdlocal.buffer_get_data(meshbuffer)
-	#var output := output_bytes.to_float32_array()
-	#RenderingServer.multimesh_set_buffer(thismesh,output)
-	#print("instances: ",RenderingServer.multimesh_get_visible_instances(thismesh))
+
 
 
 
@@ -137,8 +135,10 @@ func maketestbuffer():
 	for i in range (meshcount-suns):
 		var circrand=randf_range(-PI,PI)
 		var massrand=randf_range(.3,0.5)
-		var radiusrand=randf_range(4.0,20.0) 
-		if (i<num_planets): massrand=randf_range(50,200)
+		var radiusrand=5+i #randf_range(4.0,20.0) 
+		if (i<num_planets):
+			radiusrand=4+1.4**i
+			massrand=randf_range(50,200)
 		totalplanetmass+=massrand
 		var size=sqrt(massrand)*0.1
 		var planetvel=sqrt(BigG*solarmass/radiusrand) # assume orbital velocity
@@ -158,8 +158,6 @@ func maketestbuffer():
 	#colour, custom.x])
 	
 		# Array 1:3 velocity, 4-mass 5:7 acceleration, 8 free
-		#velocities.append_array([6*temppos.origin.z+randf_range(-.1,.1),0.0\
-		#, -6*temppos.origin.x+randf_range(-.1,.1),massrand]);
 		velocities.append_array([-planetvel*sin(circrand),0.0\
 	, planetvel*cos(circrand),massrand]);	# initial velocity is orbital
 		
@@ -186,18 +184,26 @@ func CreateMultimesh(size):
 	var aabb = Vector3(512.0, 1000.0, 512.0)
 	var instance = RenderingServer.instance_create()
 	var scenario =  get_world_3d().scenario
-	RenderingServer.instance_set_custom_aabb(instance,AABB(-aabb,2*aabb))
+	#RenderingServer.instance_set_custom_aabb(instance,AABB(-aabb,2*aabb))
 	RenderingServer.instance_set_scenario(instance,scenario)
 	RenderingServer.instance_set_base(instance,multimeshid)
 	return multimeshid
 	
+#Move to planet_data
 func create_texturearray():
 	# textures from https://www.solarsystemscope.com/textures/
 	var texturearray :Texture2DArray = Texture2DArray.new()
 	var images :Array[Image] = []
-	var imagelist =["8k_sun.jpg", "8k_mercury.jpg", "8k_venus_surface.jpg", \
-	"8k_earth_daymap.jpg","8k_mars.jpg","8k_jupiter.jpg", "8k_saturn.jpg", \
-	"2k_uranus.jpg", "2k_neptune.jpg", "8k_moon.jpg","4k_ceres_fictional.jpg","4k_eris_fictional.jpg" ]
+	#var imagelist =["8k_sun.jpg", "8k_mercury.jpg", "8k_venus_surface.jpg", \
+	#"8k_earth_daymap.jpg","8k_mars.jpg","8k_jupiter.jpg", "8k_saturn.jpg", \
+	#"2k_uranus.jpg", "2k_neptune.jpg", "8k_moon.jpg","4k_ceres_fictional.jpg","4k_eris_fictional.jpg" ]
+	
+	var imagelist =["4k_sun.jpg", "4k_mercury.jpg", "4k_venus_surface.jpg", \
+	"4k_earth_daymap.jpg","4k_mars.jpg","4k_jupiter.jpg", "4k_saturn.jpg", \
+	"4k_uranus.jpg", "4k_neptune.jpg", "4k_pluto.jpg", \
+	"4k_moon.jpg","4k_ceres_fictional.jpg","4k_eris_fictional.jpg","4k_makemake_fictional.jpg",  "4k_haumea_fictional.jpg" ]
+	
+	
 	#var imagelist =["2k_sun.jpg","testerror.jpg", "mercury.png", "venus.png", "Earth.jpeg","Mars.jpeg","Jupiter.jpeg", "saturn.jpg", "uranus.jpg","moon.png" ]
 	
 	for filename in imagelist:
@@ -206,8 +212,8 @@ func create_texturearray():
 		if ResourceLoader.exists(file_path):
 			var temptexture = load(file_path)
 			img = temptexture.get_image()
-			img.decompress()
-			img.resize(4096,2048)
+			#img.decompress()
+			#img.resize(4096,2048)
 			#img.convert(Image.FORMAT_RGB8)
 			img.generate_mipmaps()
 			images.append(img)
@@ -215,6 +221,7 @@ func create_texturearray():
 		else:print("Error loading: %s" %filename )
 		
 	num_planets=images.size()
+	print("numer of planet ", num_planets)
 	texturearray.create_from_images(images)
 	#texturearray.save_png("res:\\testtexturearray")
 	return texturearray

@@ -1,22 +1,21 @@
 //Shader "Complete Sphere Impostor"
 // https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c attempted
 //port to Godot - ChatGPT had to help in the end.
-//nearly working, but now quads not pointing at camera!
+//mostly working.
 
 shader_type spatial;
 render_mode
  unshaded,
- depth_draw_always,
+ //depth_draw_always,
  cull_disabled;
 
 uniform vec4 albedo_color : source_color = vec4(1.0);
-//uniform sampler2D equirect_texture;
 uniform float Total_layers;
 uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
-//uniform mat4 inv_model_matrix;
 
 uniform float sphere_radius = 1.0; // match Unity's hardcoded 0.5
 varying float var_ArrayLayer;
+varying float id;
 varying vec3 rayDir;
 varying vec3 rayOrigin;
 varying vec3 vertexpos;
@@ -24,20 +23,16 @@ varying vec3 vertexpos;
 void vertex() {
 
 	//instance layer of image for Tecture2Darray layer.
-float id=float(INSTANCE_ID);
-float layers=float(Total_layers);
-float layernum = mod(id,layers);
-var_ArrayLayer =layernum;
+id=float(INSTANCE_ID);
+var_ArrayLayer =float(int(mod(id+0.5,Total_layers)))+0.1;
 
 //camera position
-//vec3 worldSpaceViewerPos    = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 vec3 worldSpaceViewerPos=CAMERA_POSITION_WORLD;
 vec3 worldSpacePivotPos = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 // offset between pivot and camera
 vec3 worldSpacePivotToView = worldSpaceViewerPos - worldSpacePivotPos;
 
-
-   // Camera-facing billboard logic = BGolus
+// Camera-facing billboard logic = BGolus
 //Make the quad face the camera, not the view direction
 vec3 cam_up     = normalize(MAIN_CAM_INV_VIEW_MATRIX[1].xyz);
 vec3 cam_forward = normalize(worldSpacePivotToView);
@@ -91,11 +86,10 @@ float ray_sphere_intersect(vec3 ro, vec3 rd, vec3 center, float radius) {
 }
 
 void fragment() {
-    //vec3 ray_origin = CAMERA_POSITION_WORLD;
+  
 	vec3 ray_origin = rayOrigin;
 
     vec3 ray_dir = normalize(rayDir);
-    //vec3 obj_origin = (Model_Matrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     vec3 obj_origin = vec3(0.0, 0.0, 0.0);
 
     float t = ray_sphere_intersect(ray_origin, ray_dir, obj_origin, sphere_radius);
@@ -111,17 +105,11 @@ void fragment() {
         float phi = atan(normal.z, normal.x) / (2.0 * PI);
         float phi_frac = fract(phi);
         float theta = -acos(-normal.y) / PI;
-		vec3 tex_coord = vec3(phi_frac, theta, var_ArrayLayer);
+		vec3 tex_coord = vec3(-phi_frac, theta, var_ArrayLayer);
 		vec4 col = texture(Texture2DArrayParameter, tex_coord);
-		//col =vec4(.5);
-		/*
-		Try adding sunlight from origin?
-		vec3 sundirection=
-    DIFFUSE_LIGHT += dot(NORMAL, LIGHT) * ATTENUATION * ALBEDO;
 
-		*/
-		float sundistance=length(vertexpos);
-		float brightness=(var_ArrayLayer>0.1)? max(0.05,dot(normal,-normalize(vertexpos))):1.0;
+		// cast shadows on everything but sun (id=o)
+		float brightness=(id>0.5)? max(0.05,dot(normal,-normalize(vertexpos))):1.0;
         ALBEDO = col.rgb*brightness;
 
 
