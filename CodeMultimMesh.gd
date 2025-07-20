@@ -8,7 +8,7 @@ var rd: RenderingDevice
 var multimeshid :RID
 var compute_list
 var pipeline
-var thismesh
+var planet_Multimesh
 var meshbuffer :RID
 var firstrun :bool
 var tempbuffer
@@ -38,7 +38,7 @@ func _ready():
 	meshmaterial.set_shader_parameter("Total_Layers", num_planets*1.0)
 	tempbuffer = maketestbuffer() #starting values
 	print("v3: ", velocities[3])
-	thismesh=CreateMultimesh(meshcount)
+	planet_Multimesh=CreateMultimesh(meshcount)
 	makeComputeShader()
 	tempbuffer.clear() #free memory
 	testlayermaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
@@ -86,7 +86,7 @@ func makeComputeShader():
 	var meshuniform := RDUniform.new()
 	meshuniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	meshuniform.binding = 0 # this needs to match the "binding" in our shader file
-	meshbuffer=RenderingServer.multimesh_get_buffer_rd_rid(thismesh)
+	meshbuffer=RenderingServer.multimesh_get_buffer_rd_rid(planet_Multimesh)
 	meshuniform.add_id(meshbuffer)
 	
 	#velocities and accelerations in one buffer
@@ -132,17 +132,18 @@ func maketestbuffer():
 		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
 	
 	var totalplanetmass=0
-	for i in range (meshcount-suns):
+	for i in range (1,meshcount):
 		var circrand=randf_range(-PI,PI)
 		var massrand=randf_range(.3,0.5)
-		var radiusrand=5+i #randf_range(4.0,20.0) 
+		var radiusrand=randf_range(20.,34.) 
+		var planetvel=sqrt(BigG*solarmass/radiusrand) # assume orbital velocity
 		if (i<num_planets):
-			radiusrand=4+1.4**i
+			radiusrand=3+2**i
 			massrand=randf_range(50,200)
+			print("Planet R, Period: ", radiusrand,";", 2*PI*radiusrand/planetvel)
+			
 		totalplanetmass+=massrand
 		var size=sqrt(massrand)*0.1
-		var planetvel=sqrt(BigG*solarmass/radiusrand) # assume orbital velocity
-		#print("Mass: ",massrand," size: ", size," vel: ",planetvel, "surfaceg: ", BigG*massrand*massrand/(size*size),)
 		
 		#if (i==(meshcount/5)): planetvel=0; #testing collisions
 		var temppos = Transform3D.IDENTITY.scaled(Vector3(size,size,size))
@@ -160,16 +161,14 @@ func maketestbuffer():
 		# Array 1:3 velocity, 4-mass 5:7 acceleration, 8 free
 		velocities.append_array([-planetvel*sin(circrand),0.0\
 	, planetvel*cos(circrand),massrand]);	# initial velocity is orbital
-		
-		#velocities.append_array([0.0,randf_range(-0.1,.1), 0.0, massrand]);
 		velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
-	
-	
 	var mesharray = PackedFloat32Array(interimarray)
-	#var buffertest := rd.storage_buffer_create(mesharray.size(), mesharray)
 	print ("planets total mass: ",totalplanetmass)
 	return mesharray
 	#end of test buffer
+
+func makeplanet(interimarray,size,mass,position,velocity):
+	print("nothing")
 
 func CreateMultimesh(size):
 	multimeshid = RenderingServer.multimesh_create()

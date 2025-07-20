@@ -39,14 +39,14 @@ visible = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.995237, 3.21347, 15.6164)
 environment = SubResource("Environment_q1jqv")
 current = true
-far = 50.81
+far = 210.62
 script = ExtResource("1_hhxjg")
 mousespeed = 0.05
 
 [node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh")]
 script = ExtResource("1_5wkny")
 TestMesh = NodePath("PlanetMesh")
-meshcount = 16
+meshcount = 2000
 testlayermaterial = ExtResource("5_th6lg")
 
 [node name="PlanetMesh" type="MeshInstance3D" parent="CodeMultimesh"]
@@ -55,10 +55,12 @@ mesh = SubResource("QuadMesh_2aubu")
 
 [node name="TestMaterial" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
+visible = false
 mesh = SubResource("QuadMesh_q1jqv")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+visible = false
 mesh = SubResource("QuadMesh_4oi7q")
 
 [node name="Control" type="Control" parent="."]

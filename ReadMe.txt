@@ -21,4 +21,4 @@ Basic function - implement gravity attraction between particles.
 F=GMm/r^2
 
 
-Images from NASA and wikipedia
+Images from NASA and wikipedia and https://www.solarsystemscope.com/textures/
