@@ -14,17 +14,20 @@ uniform float Total_layers;
 uniform sampler2DArray Texture2DArrayParameter : filter_nearest_mipmap;
 
 uniform float sphere_radius = 1.0; // match Unity's hardcoded 0.5
-varying float var_ArrayLayer;
+//varying float var_ArrayLayer;
 varying float id;
 varying vec3 rayDir;
 varying vec3 rayOrigin;
 varying vec3 vertexpos;
+varying vec4 i_color;
 
 void vertex() {
 
-	//instance layer of image for Tecture2Darray layer.
+	//instance layer of image for Tecture2Darray layer. Used to avoid shadow on sun
 id=float(INSTANCE_ID);
-var_ArrayLayer =float(int(mod(id+0.5,Total_layers)))+0.1;
+//var_ArrayLayer =float(int(mod(id+0.5,Total_layers)))+0.1;
+	i_color = COLOR.rgba;
+
 
 //camera position
 vec3 worldSpaceViewerPos=CAMERA_POSITION_WORLD;
@@ -102,10 +105,13 @@ void fragment() {
     //vec3 local_pos = (INV_MODEL_MATRIX * vec4(hit_pos, 1.0)).xyz;
     vec3 normal = normalize(hit_pos);
 
-        float phi = atan(normal.z, normal.x) / (2.0 * PI);
+        float phi = atan(normal.z, normal.x) / (2.0 * PI)+i_color.g;
         float phi_frac = fract(phi);
         float theta = -acos(-normal.y) / PI;
-		vec3 tex_coord = vec3(-phi_frac, theta, var_ArrayLayer);
+		//i.color= COLOR from multimesh. R used for layer. 
+		// Trying G for rotation and B for rotation rate
+		vec3 tex_coord = vec3(-phi_frac, theta, i_color.r);
+		//vec3 tex_coord = vec3(-phi_frac, theta, var_ArrayLayer);
 		vec4 col = texture(Texture2DArrayParameter, tex_coord);
 
 		// cast shadows on everything but sun (id=o)

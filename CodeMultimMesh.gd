@@ -52,7 +52,7 @@ func _ready():
 func _process(delta):
 	# Create a compute pipeline
 	if(!paused and !firstframe):
-		var dispatchnumber=meshcount-1 # not updating sun
+		var dispatchnumber=meshcount # not updating sun
 		compute_list = rd.compute_list_begin()
 		rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
 		rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
@@ -67,8 +67,6 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("Pause"): paused =!paused
 	
-
-
 
 
 func makeComputeShader():
@@ -113,7 +111,7 @@ func makeComputeShader():
 	verletuniform_set = rd.uniform_set_create([meshuniform, paramuniform, velocityuniform], verletshader, 0) 
 	verletpipeline= rd.compute_pipeline_create(verletshader)
 
-### Make test buffer in multimesh transform format
+### Make data buffer in mutimesh
 func maketestbuffer():
 	var interimarray=[]
 	var suns=1
@@ -142,7 +140,6 @@ func maketestbuffer():
 		#velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
 		planetindex+=1
 		makeplanet(temppos,planetvelocity,planetindex)
-		print("index: ",planetindex)
 	
 	#var mesharray = PackedFloat32Array(interimarray)
 	print ("planets total mass: ",totalplanetmass)
@@ -151,6 +148,14 @@ func maketestbuffer():
 
 func makeplanet(planettransform,velocity,planetindex):
 	RenderingServer.multimesh_instance_set_transform(planet_Multimesh, planetindex, planettransform)
+	var planetcolor
+	var rotation_speed=randf_range(0.1,2)
+	if planetindex<num_planets:
+		planetcolor=Color(planetindex,0,rotation_speed,0)
+	else:
+		var moonimages=randi_range(10,14)
+		planetcolor=Color(moonimages,0,rotation_speed,0)
+	RenderingServer.multimesh_instance_set_color(planet_Multimesh,planetindex, planetcolor)
 	# Array 1:3 velocity, 4-mass 5:7 acceleration, 8 free
 	velocities.append_array(velocity) #x,y,z,mass
 	velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
@@ -164,7 +169,7 @@ func CreateMultimesh(size):
 	multimeshid,\
 	size,\
 	RenderingServer.MultimeshTransformFormat.MULTIMESH_TRANSFORM_3D,\
-	false, false,false) #colours, custom, useindirect
+	true, true,false) #colours, custom, useindirect
 	
 	RenderingServer.multimesh_set_mesh(multimeshid, TestMesh.mesh.get_rid())
 	#RenderingServer.multimesh_set_buffer(multimeshid,tempbuffer)

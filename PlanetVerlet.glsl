@@ -24,8 +24,10 @@ layout(set = 0, binding = 1) restrict uniform ParameterBuffer {
 }
 parameter_buffer;
 
-uint stride=12;// 12 by default, this will need to be 16 or 20 if colour/custom is used
-//custom is now used so 16 stride
+uint stride=20;// 12 by default, this will need to be 16 or 20 if colour/custom is used
+//color and custom is now used so 20 stride
+
+float rotation_speed=0.001;
 
 // velocity, acceleration and mass buffer
 layout(set = 0, binding = 2, std430) restrict buffer VelocityBuffer {
@@ -45,6 +47,8 @@ struct Planet{
     //mat3x3 basis;
     float mass;
     float rad;
+    float rotation;
+    float rotation_rate;
     };
 
 Planet get_planet(uint planet){
@@ -57,6 +61,11 @@ Planet get_planet(uint planet){
     thisplanet.pos = vec3(my_data_buffer.data[planetdata+3],my_data_buffer.data[planetdata+7],my_data_buffer.data[planetdata+11]);// based on transform buffer in multimesh
 
     thisplanet.rad= my_data_buffer.data[planetdata]; //actually scale.x
+		//i.color= COLOR from multimesh. R used for layer. color in positions 12-15. Custom in positions 16-20
+		// Trying G for rotation and B for rotation rate
+    thisplanet.rotation = my_data_buffer.data[planetdata+13];
+    thisplanet.rotation_rate = my_data_buffer.data[planetdata+14];
+
     return thisplanet;
 }
 
@@ -75,13 +84,14 @@ For Transform3D the float-order is: (basis.x.x, basis.y.x, basis.z.x, origin.x, 
 void main() {
 
 
-    uint planetID=gl_GlobalInvocationID.x+1;
+    uint planetID=gl_GlobalInvocationID.x;
     Planet thisplanet=get_planet(planetID);
 
 
 float DeltaTime=parameter_buffer.DeltaTime;
 
 thisplanet.pos += thisplanet.vel * DeltaTime + 0.50*thisplanet.acc*DeltaTime;
+thisplanet.rotation+=thisplanet.rotation_rate*rotation_speed;
 
 
 // Write data to buffers
@@ -90,6 +100,8 @@ uint planetdata=planetID*stride;
     my_data_buffer.data[planetdata+3] =thisplanet.pos.x;
     my_data_buffer.data[planetdata+7] =thisplanet.pos.y;
     my_data_buffer.data[planetdata+11] =thisplanet.pos.z;
+    my_data_buffer.data[planetdata+13] =thisplanet.rotation;
+
 
 //set planet velocity and acceleration in compute buffer
 //velocity_buffer.velocitydata[planetID*8] =newvelocity.x;

@@ -24,7 +24,7 @@ layout(set = 0, binding = 1) restrict uniform ParameterBuffer {
 }
 parameter_buffer;
 
-uint stride=12;// 12 by default, this will need to be 16 or 20 if colour/custom is used
+uint stride=20;// 12 by default, this will need to be 16 or 20 if colour/custom is used
 // custom is now used so 16
 
 // velocity, acceleration and mass buffer
@@ -93,7 +93,7 @@ return netforce;
 void main() {
     // gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups
 
-    uint planetID=gl_GlobalInvocationID.x+1;
+    uint planetID=gl_GlobalInvocationID.x;
     Planet thisplanet=get_planet(planetID);
 
     vec3 oldacc=thisplanet.acc;
