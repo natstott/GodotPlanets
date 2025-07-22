@@ -4,12 +4,15 @@
 // Invocations in the (x, y, z) dimension
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
-// A binding to the buffer we create in our script. data[] matches format of multimesh buffer - so it will have more fields if the multimesh has colour and custom data.
 
+// A binding to the buffer we create in our script. data[] matches format of multimesh buffer - so it will have more fields if the multimesh has colour and custom data.
 layout(set = 0, binding = 0, std430) restrict buffer MyDataBuffer {
     float data[];
 }
 my_data_buffer;
+uint stride=20;// 12 by default, this will need to be 16 or 20 if colour/custom is used
+// custom is now used so 16
+
 
 // Parameters
 layout(set = 0, binding = 1) restrict uniform ParameterBuffer {
@@ -18,14 +21,13 @@ layout(set = 0, binding = 1) restrict uniform ParameterBuffer {
     uint dummy3;
     uint dummy4;
     float BigG;
-    float DummyMass;
+    float DummyMass; //not used testing only
     float DeltaTime;
     float packing;
 }
 parameter_buffer;
 
-uint stride=20;// 12 by default, this will need to be 16 or 20 if colour/custom is used
-// custom is now used so 16
+
 
 // velocity, acceleration and mass buffer
 layout(set = 0, binding = 2, std430) restrict buffer VelocityBuffer {

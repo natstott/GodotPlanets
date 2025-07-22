@@ -89,7 +89,7 @@ float ray_sphere_intersect(vec3 ro, vec3 rd, vec3 center, float radius) {
 }
 
 void fragment() {
-  
+
 	vec3 ray_origin = rayOrigin;
 
     vec3 ray_dir = normalize(rayDir);
@@ -108,7 +108,7 @@ void fragment() {
         float phi = atan(normal.z, normal.x) / (2.0 * PI)+i_color.g;
         float phi_frac = fract(phi);
         float theta = -acos(-normal.y) / PI;
-		//i.color= COLOR from multimesh. R used for layer. 
+		//i.color= COLOR from multimesh. R used for layer.
 		// Trying G for rotation and B for rotation rate
 		vec3 tex_coord = vec3(-phi_frac, theta, i_color.r);
 		//vec3 tex_coord = vec3(-phi_frac, theta, var_ArrayLayer);

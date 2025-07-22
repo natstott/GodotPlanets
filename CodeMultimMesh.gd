@@ -2,8 +2,9 @@ extends Marker3D
 
 @export var TestMesh :MeshInstance3D
 @export var meshcount :int
-@export var testlayermaterial :Material
-var testlayernum=0.0
+@export var cameralink :Camera3D
+#@export var testlayermaterial :Material
+#var testlayernum=0.0
 var rd: RenderingDevice
 #var multimeshid :RID
 var compute_list
@@ -40,16 +41,17 @@ func _ready():
 	
 	#print("v3: ", velocities[3])
 	planet_Multimesh=CreateMultimesh(meshcount)
+	cameralink.Set_multimesh(planet_Multimesh)
 	maketestbuffer() #starting values
 	makeComputeShader()
 	#tempbuffer.clear() #free memory
-	testlayermaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
+	#testlayermaterial.set_shader_parameter("Texture2DArrayParameter", texturearray)
 	print("pipeline ready:" ,rd.compute_pipeline_is_valid(pipeline))
 	print("verletpipeline ready:" ,rd.compute_pipeline_is_valid(verletpipeline))	
 
 
 
-func _process(delta):
+func _process(_delta):
 	# Create a compute pipeline
 	if(!paused and !firstframe):
 		var dispatchnumber=meshcount # not updating sun
@@ -113,7 +115,6 @@ func makeComputeShader():
 
 ### Make data buffer in mutimesh
 func maketestbuffer():
-	var interimarray=[]
 	var suns=1
 	var planetindex=0
 	if(suns>0):
@@ -149,7 +150,7 @@ func maketestbuffer():
 func makeplanet(planettransform,velocity,planetindex):
 	RenderingServer.multimesh_instance_set_transform(planet_Multimesh, planetindex, planettransform)
 	var planetcolor
-	var rotation_speed=randf_range(0.1,2)
+	var rotation_speed=randf_range(0.1,5)
 	if planetindex<num_planets:
 		planetcolor=Color(planetindex,0,rotation_speed,0)
 	else:
@@ -159,9 +160,7 @@ func makeplanet(planettransform,velocity,planetindex):
 	# Array 1:3 velocity, 4-mass 5:7 acceleration, 8 free
 	velocities.append_array(velocity) #x,y,z,mass
 	velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
-	if(planetindex>1990):
-		print("instance: ",RenderingServer.multimesh_instance_get_transform(planet_Multimesh, planetindex))
-	
+
 
 func CreateMultimesh(size):
 	var multimeshid = RenderingServer.multimesh_create()
