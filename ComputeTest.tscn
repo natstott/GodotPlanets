@@ -38,7 +38,7 @@ mousespeed = 0.05
 [node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh", "cameralink")]
 script = ExtResource("1_5wkny")
 TestMesh = NodePath("PlanetMesh")
-meshcount = 4000
+meshcount = 6000
 cameralink = NodePath("../Camera3D")
 
 [node name="PlanetMesh" type="MeshInstance3D" parent="CodeMultimesh"]

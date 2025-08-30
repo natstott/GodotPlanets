@@ -134,8 +134,11 @@ func maketestbuffer():
 		var planetvel=sqrt(BigG*solarmass/radiusrand) # assume orbital velocity
 		totalplanetmass+=massrand
 		var size=sqrt(massrand)*0.1
-		
-		var temppos = Transform3D.IDENTITY.scaled(Vector3(size,size,size))
+		var Planetscale =Vector3(size,size,size)
+		#if size<1:
+		#	Planetscale*=Vector3(randf_range(0.1,3),randf_range(0.1,3),randf_range(0.1,3))
+	
+		var temppos = Transform3D.IDENTITY.scaled(Planetscale)
 		temppos = temppos.translated(Vector3(radiusrand*cos(circrand), randf_range(-.10,.10), radiusrand*sin(circrand)))
 		var planetvelocity =[-planetvel*sin(circrand),0.0, planetvel*cos(circrand),massrand]
 		#velocities.append_array([0.0,0.0,0.0,0.0]) #zero acceleration
@@ -183,7 +186,7 @@ func create_texturearray():
 	# textures from https://www.solarsystemscope.com/textures/
 	var texturearray :Texture2DArray = Texture2DArray.new()
 	var images :Array[Image] = []
-	var imagelist =["4k_sun.jpg", "4k_mercury.jpg", "4k_venus_surface.jpg", \
+	var imagelist =["4k_sun.jpg", "4k_mercury.jpg", "4k_venus_clouds.jpg", \
 	"4k_earth_daymap.jpg","4k_mars.jpg","4k_jupiter.jpg", "4k_saturn.jpg", \
 	"4k_uranus.jpg", "4k_neptune.jpg", "4k_pluto.jpg", \
 	"4k_moon.jpg","4k_ceres_fictional.jpg","4k_eris_fictional.jpg","4k_makemake_fictional.jpg",  "4k_haumea_fictional.jpg" ]
