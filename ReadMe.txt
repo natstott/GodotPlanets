@@ -13,12 +13,26 @@ using multimesh_get_command_buffer_rd_rid until u/godot_clayjohn explained
 that a compute shader can run on the global renderingdevice but you will not
 be able to control when exactly it is dispatched.
 
-Now using Texture2DArray to store planet images and using simple instance id to
+Using Texture2DArray to store planet images and using simple instance id to
 draw them using a sphere impostor based on :https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
 by Ben Golus
+Haven't yet fixed the seam, he used fwidth() hlsl function which I cant find in glsl
+
+The number of planets are just set by the number of images. The rest are set to random moons
+
 
 Basic function - implement gravity attraction between particles.
 F=GMm/r^2
-
+calculated for every obect on every other object in compute shader to update positions.
 
 Images from NASA and wikipedia and https://www.solarsystemscope.com/textures/
+These are not included in the github verions, you will have to download the 4K images or use your own
+
+
+The camera follows a planet position, selected by left ctrl.
+
+I found the multimesh_instance_get_transform() function doesn't retrieve live values from the 
+buffer, just the local cache, so as I am updating multimesh positions on the GPU,
+I had to use:
+	func Get_Planet(planetid):
+in CameraMove.gd to retrieve the buffer section I need each frame.
