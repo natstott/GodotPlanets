@@ -1,7 +1,7 @@
 //Shader "Complete Sphere Impostor"
 // https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c attempted
-//port to Godot - ChatGPT had to help in the end.
-//mostly working.
+//port to Godot - ChatGPT had to help in the end to suggest the right matrices.
+//mostly working. Still a seem where uvs wrap around, fwidth() function to find gradient?
 
 shader_type spatial;
 render_mode
@@ -44,7 +44,7 @@ vec3 cam_right = normalize(cross(cam_forward, cam_up));
 cam_up = cross(cam_right, cam_forward);
 
 float scale = max(length(MODEL_MATRIX[0].xyz), max(length(MODEL_MATRIX[1].xyz), length(MODEL_MATRIX[2].xyz)));
-//BG quad scaling to fit
+//BGolus quad scaling to fit
                     float maxRadius=sphere_radius*scale;
                     // get the sine of the right triangle with the hyp of the sphere pivot distance and the opp of the sphere radius
                     float sinAngle = maxRadius / length(worldSpacePivotToView);
@@ -68,7 +68,7 @@ mat4    INV_MODEL_MATRIX = inverse(MODEL_MATRIX);
 
 
 
-
+// ray direction and origin 
 // convert to model space to use in fragment, after varying adjustment
 	rayDir=(INV_MODEL_MATRIX*vec4(worldSpaceRayDir,0.0)).xyz;
 	rayOrigin=(INV_MODEL_MATRIX*vec4(worldSpaceRayOrigin,1.0)).xyz;
@@ -108,9 +108,13 @@ void fragment() {
         float phi = atan(normal.z, normal.x) / (2.0 * PI)+i_color.g;
         float phi_frac = fract(phi);
         float theta = -acos(-normal.y) / PI;
-		//i.color= COLOR from multimesh. R used for layer.
+		//i.color= COLOR from multimesh. R used for layer. G is being used for fake rotation. 
 		// Trying G for rotation and B for rotation rate
-		vec3 tex_coord = vec3(-phi_frac, theta, i_color.r);
+		// uses a small bias to prefer the first 'UV set'
+		vec2 uv = vec2(fwidth(phi) < fwidth(phi_frac) - 0.001 ? phi : phi_frac, theta);
+		
+		//vec3 tex_coord = vec3(-phi_frac, theta, i_color.r);
+		vec3 tex_coord = vec3(uv, i_color.r);
 		//vec3 tex_coord = vec3(-phi_frac, theta, var_ArrayLayer);
 		vec4 col = texture(Texture2DArrayParameter, tex_coord);
 

@@ -25,7 +25,11 @@ func get_csv_data():
 		csv.append(csv_rows)
 	file.close()
 	csv.pop_back() #remove last empty array get_csv_line() has created 
-	#headers = Array(csv[0])
+	var headers = Array(csv[0])
+	#["Name", "Parent", "Orbit_Radius", "Equatorial radius",
+	#"Rotation period[d]", "Orbital period[d]", "Mean orbital speedkps",
+	# "Eccentricity", "Inclination[f]", "Axial tilt[i]", "Rings?", "Mass(1E24)", "Texture"]
+
 	
 	for i in range(1,csv.size()):
 		var temparray=[]
@@ -35,4 +39,6 @@ func get_csv_data():
 			else:
 				temparray.append(element)
 		planetdata.append(temparray)
-		#print(temparray)
+	print(headers)
+	print(planetdata[0])
+	print(planetdata[1])

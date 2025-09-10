@@ -25,6 +25,8 @@ var solarmass=50000.0
 var num_planets=15
 var paused=false
 var firstframe = true
+var imagelist
+
 
 
 
@@ -156,6 +158,8 @@ func makeplanet(planettransform,velocity,planetindex):
 	var rotation_speed=randf_range(0.1,5)
 	if planetindex<num_planets:
 		planetcolor=Color(planetindex,0,rotation_speed,0)
+		print("R: ",planettransform.origin.length(), " m:", velocity[3]," V:",Vector3(velocity[0],velocity[1],velocity[2]).length(), \
+		" name: ",imagelist[planetindex] )
 	else:
 		var moonimages=randi_range(10,14)
 		planetcolor=Color(moonimages,0,rotation_speed,0)
@@ -186,7 +190,7 @@ func create_texturearray():
 	# textures from https://www.solarsystemscope.com/textures/
 	var texturearray :Texture2DArray = Texture2DArray.new()
 	var images :Array[Image] = []
-	var imagelist =["4k_sun.jpg", "4k_mercury.jpg", "4k_venus_clouds.jpg", \
+	imagelist =["4k_sun.jpg", "4k_mercury.jpg", "4k_venus_clouds.jpg", \
 	"4k_earth_daymap.jpg","4k_mars.jpg","4k_jupiter.jpg", "4k_saturn.jpg", \
 	"4k_uranus.jpg", "4k_neptune.jpg", "4k_pluto.jpg", \
 	"4k_moon.jpg","4k_ceres_fictional.jpg","4k_eris_fictional.jpg","4k_makemake_fictional.jpg",  "4k_haumea_fictional.jpg" ]

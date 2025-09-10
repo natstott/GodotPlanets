@@ -45,7 +45,7 @@ func _process(delta):
 		translate_object_local(Vector3(0,move_speed,0))	
 	
 	if Input.is_action_just_pressed("Changeplanet"):
-		watchingplanet=(watchingplanet+1)%8
+		watchingplanet=(watchingplanet+1)%12
 
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT ):
 		var screen=get_viewport().get_visible_rect().size

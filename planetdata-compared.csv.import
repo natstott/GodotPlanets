@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bjpvt0pqu5p0a"
+
+[deps]
+
+files=["res://planetdata-compared.Parent.translation", "res://planetdata-compared.Orbit.translation", "res://planetdata-compared.Equatorial radius.translation", "res://planetdata-compared.Rotation period[d].translation", "res://planetdata-compared.Orbital period[d].translation", "res://planetdata-compared.Mean orbital speedkps.translation", "res://planetdata-compared.Eccentricity.translation", "res://planetdata-compared.Inclination[f].translation", "res://planetdata-compared.Axial tilt[i].translation", "res://planetdata-compared.Rings?.translation", "res://planetdata-compared.Mass(1E24).translation", "res://planetdata-compared.Texture.translation"]
+
+source_file="res://planetdata-compared.csv"
+dest_files=["res://planetdata-compared.Parent.translation", "res://planetdata-compared.Orbit.translation", "res://planetdata-compared.Equatorial radius.translation", "res://planetdata-compared.Rotation period[d].translation", "res://planetdata-compared.Orbital period[d].translation", "res://planetdata-compared.Mean orbital speedkps.translation", "res://planetdata-compared.Eccentricity.translation", "res://planetdata-compared.Inclination[f].translation", "res://planetdata-compared.Axial tilt[i].translation", "res://planetdata-compared.Rings?.translation", "res://planetdata-compared.Mass(1E24).translation", "res://planetdata-compared.Texture.translation"]
+
+[params]
+
+compress=true
+delimiter=0

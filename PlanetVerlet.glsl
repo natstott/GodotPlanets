@@ -100,7 +100,7 @@ uint planetdata=planetID*stride;
     my_data_buffer.data[planetdata+3] =thisplanet.pos.x;
     my_data_buffer.data[planetdata+7] =thisplanet.pos.y;
     my_data_buffer.data[planetdata+11] =thisplanet.pos.z;
-    my_data_buffer.data[planetdata+13] =thisplanet.rotation;
+    my_data_buffer.data[planetdata+13] =mod(thisplanet.rotation, 6.283185307); //using mod so rotation doesnt eventually exceed float accuracy
 
 
 //set planet velocity and acceleration in compute buffer

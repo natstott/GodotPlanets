@@ -16,7 +16,9 @@ be able to control when exactly it is dispatched.
 Using Texture2DArray to store planet images and using simple instance id to
 draw them using a sphere impostor based on :https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
 by Ben Golus
-Haven't yet fixed the seam, he used fwidth() hlsl function which I cant find in glsl
+Haven't yet fixed the seam, he used fwidth() hlsl function which doesn't solve it in glsl
+See: https://bgolus.medium.com/distinctive-derivative-differences-cce38d36797b for an explanation
+of mipmap choice and wrapping uvs.
 
 The number of planets are just set by the number of images. The rest are set to random moons
 
