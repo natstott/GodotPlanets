@@ -38,3 +38,5 @@ buffer, just the local cache, so as I am updating multimesh positions on the GPU
 I had to use:
 	func Get_Planet(planetid):
 in CameraMove.gd to retrieve the buffer section I need each frame.
+Not using large_world_coordinates means that Pluto is the furthest that can be drawn properly.
+Whether double could even work with the multimesh is doubtful as it uses PackedFloat32Array.
