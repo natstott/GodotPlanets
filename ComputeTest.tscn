@@ -1,11 +1,21 @@
-[gd_scene load_steps=11 format=3 uid="uid://lmjxrc5mx4d2"]
+[gd_scene load_steps=13 format=3 uid="uid://lmjxrc5mx4d2"]
 
 [ext_resource type="Material" uid="uid://cjtkp6woo4wr5" path="res://sky_material.tres" id="1_4oi7q"]
 [ext_resource type="Script" uid="uid://26efb2lgr2qq" path="res://CodeMultimMesh.gd" id="1_5wkny"]
-[ext_resource type="Script" uid="uid://bbjfrbsgdc7op" path="res://CameraMove.gd" id="1_hhxjg"]
 [ext_resource type="Script" uid="uid://bhbjo73kx7uq5" path="res://fps_label.gd" id="3_2aubu"]
 [ext_resource type="Material" uid="uid://chb1wm7f7aqfb" path="res://Impostor.tres" id="3_k2cyx"]
+[ext_resource type="Script" uid="uid://b2ft5u46adx6a" path="res://SpaceShipMove.gd" id="5_qaoat"]
 [ext_resource type="Script" uid="uid://dv72n2rdgrsd6" path="res://planet_data.gd" id="6_qaoat"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_2aubu"]
+material = ExtResource("3_k2cyx")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_k2cyx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qaoat"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4oi7q"]
+material = SubResource("StandardMaterial3D_qaoat")
 
 [sub_resource type="Sky" id="Sky_th6lg"]
 sky_material = ExtResource("1_4oi7q")
@@ -16,30 +26,17 @@ sky = SubResource("Sky_th6lg")
 ambient_light_source = 1
 reflected_light_source = 1
 
-[sub_resource type="QuadMesh" id="QuadMesh_2aubu"]
-material = ExtResource("3_k2cyx")
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_k2cyx"]
-
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.72034, 1.86541)
 visible = false
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.995237, 3.21347, 15.6164)
-environment = SubResource("Environment_q1jqv")
-current = true
-far = 1184.08
-script = ExtResource("1_hhxjg")
-mousespeed = 0.05
-
 [node name="CodeMultimesh" type="Marker3D" parent="." node_paths=PackedStringArray("TestMesh", "cameralink")]
 script = ExtResource("1_5wkny")
 TestMesh = NodePath("PlanetMesh")
 meshcount = 6000
-cameralink = NodePath("../Camera3D")
+cameralink = NodePath("../spaceship")
 
 [node name="PlanetMesh" type="MeshInstance3D" parent="CodeMultimesh"]
 visible = false
@@ -58,18 +55,30 @@ mouse_default_cursor_shape = 2
 
 [node name="VSplitContainer" type="VSplitContainer" parent="Control"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 575.0
+offset_bottom = 271.0
+scale = Vector2(1, 0.92000014)
+
+[node name="Planetname" type="Label" parent="Control/VSplitContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+size_flags_stretch_ratio = 0.0
+text = "Planet"
+vertical_alignment = 2
 
 [node name="FPSLabel" type="Label" parent="Control/VSplitContainer"]
 custom_minimum_size = Vector2(200, 100)
 layout_mode = 2
+size_flags_vertical = 0
+text = "FPS Label"
 script = ExtResource("3_2aubu")
 
 [node name="HSlider" type="HSlider" parent="Control/VSplitContainer"]
+visible = false
 material = SubResource("CanvasItemMaterial_k2cyx")
 custom_minimum_size = Vector2(400, 100)
 layout_mode = 2
+size_flags_vertical = 8
 min_value = 0.1
 max_value = 20.0
 step = 0.1
@@ -80,5 +89,15 @@ ticks_on_borders = true
 [node name="PlanetData" type="Node3D" parent="."]
 visible = false
 script = ExtResource("6_qaoat")
+
+[node name="spaceship" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_4oi7q")
+script = ExtResource("5_qaoat")
+
+[node name="Camera3D" type="Camera3D" parent="spaceship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+environment = SubResource("Environment_q1jqv")
+current = true
+far = 1184.08
 
 [connection signal="value_changed" from="Control/VSplitContainer/HSlider" to="CodeMultimesh" method="_on_h_slider_value_changed"]

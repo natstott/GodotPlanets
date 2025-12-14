@@ -2,7 +2,7 @@ extends Marker3D
 
 @export var TestMesh :MeshInstance3D
 @export var meshcount :int
-@export var cameralink :Camera3D
+@export var cameralink :MeshInstance3D
 #@export var testlayermaterial :Material
 #var testlayernum=0.0
 var rd: RenderingDevice
